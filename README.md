@@ -4,6 +4,6 @@
 
 ---
 
-# Raxos Router
+# Raxos OpenAPI
 
-Repository the Router library of [Raxos](https://github.com/basmilius/raxos).
+Repository the OpenAPI generator of [Raxos](https://github.com/basmilius/raxos).
