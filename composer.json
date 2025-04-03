@@ -1,0 +1,42 @@
+{
+    "name": "raxos/openapi",
+    "description": "An OpenAPI generator for Raxos.",
+    "license": "mit",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "type": "library",
+    "authors": [
+        {
+            "name": "Bas Milius",
+            "email": "bas@mili.us"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Raxos\\OpenAPI\\": "src/Raxos/OpenAPI"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.4"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../*",
+            "symlink": true
+        }
+    ],
+    "require": {
+        "ext-fileinfo": "*",
+        "ext-json": "*",
+        "ext-simplexml": "*",
+        "jetbrains/phpstorm-attributes": "^1.2",
+        "raxos/database": "*",
+        "raxos/foundation": "*",
+        "raxos/http": "*",
+        "raxos/router": "*",
+        "symfony/yaml": "^7.2"
+    }
+}
