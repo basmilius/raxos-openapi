@@ -6,7 +6,9 @@ namespace Raxos\OpenAPI;
 use JsonException;
 use Raxos\OpenAPI\Contract\DefinitionInterface;
 use Raxos\OpenAPI\Definition\{Components, Info, Path, Server, Tag};
+use Raxos\OpenAPI\Error\OpenAPIException;
 use Raxos\Router\Contract\RouterInterface;
+use ReflectionException;
 use Symfony\Component\Yaml\Yaml;
 use function array_filter;
 use function iterator_to_array;
@@ -105,16 +107,21 @@ final readonly class OpenAPI implements DefinitionInterface
      * @param RouterInterface $router
      *
      * @return Path[]
+     * @throws OpenAPIException
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
     public static function getPathsFromRouter(RouterInterface $router): array
     {
-        $paths = iterator_to_array(RouterGenerator::generate($router));
+        try {
+            $paths = iterator_to_array(RouterGenerator::generate($router));
 
-        ksort($paths);
+            ksort($paths);
 
-        return $paths;
+            return $paths;
+        } catch (ReflectionException $err) {
+            throw OpenAPIException::reflection($err);
+        }
     }
 
 }
