@@ -6,4 +6,4 @@
 
 # Raxos OpenAPI
 
-Repository the OpenAPI generator of [Raxos](https://github.com/basmilius/raxos).
+Repository for the OpenAPI generator of [Raxos](https://github.com/basmilius/raxos).
