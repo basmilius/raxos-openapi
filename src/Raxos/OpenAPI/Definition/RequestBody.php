@@ -8,42 +8,42 @@ use Raxos\OpenAPI\DefinitionHelper;
 use function array_filter;
 
 /**
- * Class Response
+ * Class RequestBody
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
- * @since 1.7.0
+ * @package Raxos\OpenAPI\Definition
+ * @since 1.8.0
  */
-final readonly class Response implements DefinitionInterface
+final readonly class RequestBody implements DefinitionInterface
 {
 
     /**
-     * Response conDefinitionor.
+     * RequestBody constructor.
      *
      * @param string|null $description
-     * @param array<string, string|string[]>|null $headers
      * @param array|null $content
+     * @param bool|null $required
      *
      * @author Bas Milius <bas@mili.us>
-     * @since 1.7.0
+     * @since 1.8.0
      */
     public function __construct(
         public ?string $description = null,
-        public ?array $headers = null,
-        public ?array $content = null
+        public ?array $content = null,
+        public ?bool $required = null
     ) {}
 
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.7.0
+     * @since 1.8.0
      */
     public function jsonSerialize(): array
     {
         return array_filter([
             'description' => $this->description,
-            'headers' => $this->headers,
-            'content' => $this->content
+            'content' => $this->content,
+            'required' => $this->required
         ], DefinitionHelper::isNotNull(...));
     }
 

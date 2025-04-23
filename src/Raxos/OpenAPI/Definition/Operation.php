@@ -26,7 +26,7 @@ final readonly class Operation implements DefinitionInterface
      * @param string|null $operationId
      * @param string[]|null $tags
      * @param Parameter[]|null $parameters
-     * @param mixed|null $requestBody
+     * @param RequestBody|null $requestBody
      * @param array|null $responses
      * @param bool $deprecated
      * @param array|null $security
@@ -41,7 +41,7 @@ final readonly class Operation implements DefinitionInterface
         public ?string $operationId = null,
         public ?array $tags = null,
         public ?array $parameters = null,
-        public mixed $requestBody = null,
+        public ?RequestBody $requestBody = null,
         public ?array $responses = null,
         public bool $deprecated = false,
         public ?array $security = null

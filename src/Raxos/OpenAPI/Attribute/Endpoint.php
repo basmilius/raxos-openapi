@@ -28,6 +28,9 @@ final readonly class Endpoint implements AttributeInterface
      * @param ExternalDocumentation|null $externalDocs
      * @param string|null $operationId
      * @param string[]|null $security
+     * @param class-string|null $requestModel
+     * @param string|null $requestModelDescription
+     * @param bool|null $requestModelRequired
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
@@ -39,7 +42,10 @@ final readonly class Endpoint implements AttributeInterface
         public ?array $tags = null,
         public ?ExternalDocumentation $externalDocs = null,
         public ?string $operationId = null,
-        public ?array $security = null
+        public ?array $security = null,
+        public ?string $requestModel = null,
+        public ?string $requestModelDescription = null,
+        public ?bool $requestModelRequired = null
     ) {}
 
 }

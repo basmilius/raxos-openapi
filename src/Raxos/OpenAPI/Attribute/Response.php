@@ -23,13 +23,15 @@ final readonly class Response implements AttributeInterface
      *
      * @param HttpResponseCode $code
      * @param string|null $description
+     * @param class-string|null $model
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
     public function __construct(
         public HttpResponseCode $code,
-        public ?string $description = null
+        public ?string $description = null,
+        public ?string $model = null
     ) {}
 
 }
