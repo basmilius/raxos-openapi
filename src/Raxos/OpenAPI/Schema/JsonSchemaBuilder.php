@@ -84,7 +84,7 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
      * @return Schema|null
      * @throws OpenAPIException
      * @author Bas Milius <bas@mili.us>
-     * @since 22-04-2025
+     * @since 1.8.0
      */
     private function ofType(SchemaBuilder $builder, string $type): ?Schema
     {
@@ -151,7 +151,7 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
      * @return Schema|null
      * @throws OpenAPIException
      * @author Bas Milius <bas@mili.us>
-     * @since 22-04-2025
+     * @since 1.8.0
      */
     private function resolve(SchemaBuilder $builder, array|string $type): ?Schema
     {

@@ -47,7 +47,7 @@ final readonly class EnumSchemaBuilder implements SchemaBuilderInterface
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 22-04-2025
+     * @since 1.8.0
      */
     public static function can(array $types): bool
     {

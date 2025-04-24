@@ -246,7 +246,7 @@ final readonly class SchemaBuilder
      * @return Reference|Schema|null
      * @throws OpenAPIException
      * @author Bas Milius <bas@mili.us>
-     * @since 22-04-2025
+     * @since 1.8.0
      */
     private function buildSchema(Attr\Schema $schemaAttr, array $types, bool $nullable = false): Reference|Schema|null
     {
