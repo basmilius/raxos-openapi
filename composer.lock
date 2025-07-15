@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aff7d07c66649b8ce0e8bd99cea51790",
+    "content-hash": "32fbb4b8f7539b41e63cbc75749b0878",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -659,7 +659,7 @@
             "dist": {
                 "type": "path",
                 "url": "../http",
-                "reference": "bd7b676b61a8980156930f403f8963e89abb6b59"
+                "reference": "a956aaf8c23a804645de06a50bd89fb44ca7e334"
             },
             "require": {
                 "ext-ctype": "*",
@@ -667,6 +667,12 @@
                 "guzzlehttp/guzzle": "^7",
                 "jetbrains/phpstorm-attributes": "^1.2",
                 "raxos/foundation": "*"
+            },
+            "require-dev": {
+                "raxos/database": "*"
+            },
+            "suggest": {
+                "raxos/database": "to use the Model constraint attribute."
             },
             "type": "library",
             "autoload": {
@@ -694,7 +700,7 @@
             "dist": {
                 "type": "path",
                 "url": "../router",
-                "reference": "6fc752eebc24bff58a7a7c1c255974012d92e96a"
+                "reference": "6a81febf273ccaee96f1f1ace9d910ef6ffd6212"
             },
             "require": {
                 "ext-fileinfo": "*",
@@ -713,7 +719,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Raxos\\Router\\": "src/Raxos/Router"
+                    "Raxos\\Router\\": "src/"
                 }
             },
             "license": [
@@ -732,16 +738,16 @@
         },
         {
             "name": "symfony/deprecation-contracts",
-            "version": "v3.5.1",
+            "version": "v3.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/deprecation-contracts.git",
-                "reference": "74c71c939a79f7d5bf3c1ce9f5ea37ba0114c6f6"
+                "reference": "63afe740e99a13ba87ec199bb07bbdee937a5b62"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/74c71c939a79f7d5bf3c1ce9f5ea37ba0114c6f6",
-                "reference": "74c71c939a79f7d5bf3c1ce9f5ea37ba0114c6f6",
+                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/63afe740e99a13ba87ec199bb07bbdee937a5b62",
+                "reference": "63afe740e99a13ba87ec199bb07bbdee937a5b62",
                 "shasum": ""
             },
             "require": {
@@ -754,7 +760,7 @@
                     "name": "symfony/contracts"
                 },
                 "branch-alias": {
-                    "dev-main": "3.5-dev"
+                    "dev-main": "3.6-dev"
                 }
             },
             "autoload": {
@@ -779,7 +785,7 @@
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.5.1"
+                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.6.0"
             },
             "funding": [
                 {
@@ -795,11 +801,11 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-09-25T14:20:29+00:00"
+            "time": "2024-09-25T14:21:43+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.31.0",
+            "version": "v1.32.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
@@ -858,7 +864,7 @@
                 "portable"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.31.0"
+                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.32.0"
             },
             "funding": [
                 {
@@ -878,16 +884,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v7.2.5",
+            "version": "v7.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "4c4b6f4cfcd7e52053f0c8bfad0f7f30fb924912"
+                "reference": "0c3555045a46ab3cd4cc5a69d161225195230edb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/4c4b6f4cfcd7e52053f0c8bfad0f7f30fb924912",
-                "reference": "4c4b6f4cfcd7e52053f0c8bfad0f7f30fb924912",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/0c3555045a46ab3cd4cc5a69d161225195230edb",
+                "reference": "0c3555045a46ab3cd4cc5a69d161225195230edb",
                 "shasum": ""
             },
             "require": {
@@ -930,7 +936,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v7.2.5"
+                "source": "https://github.com/symfony/yaml/tree/v7.3.1"
             },
             "funding": [
                 {
@@ -946,7 +952,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-03-03T07:12:39+00:00"
+            "time": "2025-06-03T06:57:57+00:00"
         }
     ],
     "packages-dev": [],
