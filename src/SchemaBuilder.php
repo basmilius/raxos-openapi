@@ -60,6 +60,8 @@ final readonly class SchemaBuilder
     {
         try {
             $class = new ReflectionClass($class);
+
+            /** @var ReflectionAttribute<Attr\Schema> $schemaAttr */
             $schemaAttr = $class->getAttributes(Attr\Schema::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
             $schemaAttr = $schemaAttr?->newInstance();
 

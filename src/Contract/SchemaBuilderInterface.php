@@ -7,7 +7,6 @@ use Raxos\OpenAPI\Attribute as Attr;
 use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\Error\OpenAPIException;
 use Raxos\OpenAPI\SchemaBuilder;
-use ReflectionProperty;
 
 /**
  * Interface SchemaBuilderInterface
