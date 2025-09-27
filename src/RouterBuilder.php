@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace Raxos\OpenAPI;
 
 use Generator;
-use Raxos\Foundation\Collection\Map;
-use Raxos\Foundation\Contract\MapInterface;
-use Raxos\Http\Contract\HttpRequestModelInterface;
+use Raxos\Collection\Map;
+use Raxos\Contract\Collection\MapInterface;
+use Raxos\Contract\Http\HttpRequestModelInterface;
+use Raxos\Contract\OpenAPI\OpenAPIExceptionInterface;
 use Raxos\OpenAPI\Attribute as Attr;
 use Raxos\OpenAPI\Definition\{MediaType, Operation, Parameter, Path, RequestBody, Response};
 use Raxos\OpenAPI\Enum\In;
-use Raxos\OpenAPI\Error\OpenAPIException;
+use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\Router\Contract\{FrameInterface, RouterInterface};
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Frame\{ControllerFrame, FrameStack, RouteFrame};
@@ -66,7 +67,7 @@ final class RouterBuilder
      * Builds paths from the router.
      *
      * @return void
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -88,7 +89,7 @@ final class RouterBuilder
      * @param array $parameters
      *
      * @return Operation|null
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -163,7 +164,7 @@ final class RouterBuilder
                 security: $endpoint->security !== null ? iterator_to_array(DefinitionHelper::normalizeSecurity($endpoint->security)) : null
             );
         } catch (ReflectionException $err) {
-            throw OpenAPIException::reflection($err);
+            throw new ReflectionErrorException($err);
         }
     }
 
@@ -223,7 +224,7 @@ final class RouterBuilder
      * @param array $route
      *
      * @return void
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -272,7 +273,7 @@ final class RouterBuilder
      * @param Attr\Response[] $responses
      *
      * @return Generator<int, Response>
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */

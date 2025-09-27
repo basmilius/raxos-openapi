@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Raxos\OpenAPI;
 
 use JsonException;
-use Raxos\OpenAPI\Contract\DefinitionInterface;
+use Raxos\Contract\OpenAPI\DefinitionInterface;
 use Raxos\OpenAPI\Definition\{Components, Info, Path, Server, Tag};
 use Symfony\Component\Yaml\Yaml;
 use function array_filter;

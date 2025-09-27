@@ -5,11 +5,11 @@ namespace Raxos\OpenAPI\Schema;
 
 use JetBrains\PhpStorm\ArrayShape;
 use JsonSerializable;
+use Raxos\Contract\OpenAPI\{OpenAPIExceptionInterface, SchemaBuilderInterface};
 use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Contract\SchemaBuilderInterface;
 use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
-use Raxos\OpenAPI\Error\OpenAPIException;
+use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\OpenAPI\SchemaBuilder;
 use ReflectionClass;
 use ReflectionException;
@@ -71,7 +71,7 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
                 properties: $properties
             );
         } catch (ReflectionException $err) {
-            throw OpenAPIException::reflection($err);
+            throw new ReflectionErrorException($err);
         }
     }
 
@@ -82,7 +82,7 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
      * @param string $type
      *
      * @return Schema|null
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -149,7 +149,7 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
      * @param string[]|string $type
      *
      * @return Schema|null
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */

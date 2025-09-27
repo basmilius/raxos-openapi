@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace Raxos\OpenAPI\Schema;
 
+use Raxos\Contract\OpenAPI\SchemaBuilderInterface;
 use Raxos\Database\Orm\Model;
 use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Contract\SchemaBuilderInterface;
 use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\SchemaBuilder;
 use function is_subclass_of;

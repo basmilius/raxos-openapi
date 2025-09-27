@@ -5,14 +5,15 @@ namespace Raxos\OpenAPI;
 
 use Generator;
 use JsonSerializable;
+use Raxos\Collection\Map;
+use Raxos\Contract\Collection\MapInterface;
+use Raxos\Contract\OpenAPI\OpenAPIExceptionInterface;
 use Raxos\Database\Orm\Attribute as ORM;
-use Raxos\Foundation\Collection\Map;
-use Raxos\Foundation\Contract\MapInterface;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\OpenAPI\Attribute as Attr;
 use Raxos\OpenAPI\Definition\{MediaType, Reference, Response, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
-use Raxos\OpenAPI\Error\OpenAPIException;
+use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\OpenAPI\Schema\{ClassSchemaBuilder, DateTimeSchemaBuilder, EnumSchemaBuilder, FloatSchemaBuilder, IntegerSchemaBuilder, JsonSchemaBuilder, ModelSchemaBuilder, RequestModelSchemaBuilder, StringSchemaBuilder};
 use ReflectionAttribute;
 use ReflectionClass;
@@ -52,7 +53,7 @@ final readonly class SchemaBuilder
      * @param bool $nullable
      *
      * @return void
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -76,7 +77,7 @@ final readonly class SchemaBuilder
 
             $this->schemas->set($class->name, $schema);
         } catch (ReflectionException $err) {
-            throw OpenAPIException::reflection($err);
+            throw new ReflectionErrorException($err);
         }
     }
 
@@ -86,7 +87,7 @@ final readonly class SchemaBuilder
      * @param ReflectionClass $class
      *
      * @return Generator<string, Reference|Schema>
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -143,7 +144,7 @@ final readonly class SchemaBuilder
      * @param Attr\Schema $schemaAttr
      *
      * @return Reference|Schema|null
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -162,7 +163,7 @@ final readonly class SchemaBuilder
      * @param bool $nullable
      *
      * @return Reference|Schema|null
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -202,7 +203,7 @@ final readonly class SchemaBuilder
      * @param Attr\Response $responseAttr
      *
      * @return Reference|Response|null
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -246,7 +247,7 @@ final readonly class SchemaBuilder
      * @param bool $nullable
      *
      * @return Reference|Schema|null
-     * @throws OpenAPIException
+     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */

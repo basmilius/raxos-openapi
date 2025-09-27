@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Raxos\OpenAPI\Attribute;
 
 use Attribute;
+use Raxos\Contract\OpenAPI\AttributeInterface;
 use Raxos\Http\HttpResponseCode;
-use Raxos\OpenAPI\Contract\AttributeInterface;
 
 /**
  * Class Response

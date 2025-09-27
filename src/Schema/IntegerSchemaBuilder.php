@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Raxos\OpenAPI\Schema;
 
+use Raxos\Contract\OpenAPI\SchemaBuilderInterface;
 use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Contract\SchemaBuilderInterface;
 use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\Enum\{NumberFormat, SchemaType};
 use Raxos\OpenAPI\SchemaBuilder;

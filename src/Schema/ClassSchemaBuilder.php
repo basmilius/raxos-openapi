@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace Raxos\OpenAPI\Schema;
 
+use Raxos\Contract\OpenAPI\SchemaBuilderInterface;
 use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Contract\SchemaBuilderInterface;
 use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
-use Raxos\OpenAPI\Error\OpenAPIException;
+use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\OpenAPI\SchemaBuilder;
 use ReflectionClass;
 use ReflectionException;
@@ -45,7 +45,7 @@ final readonly class ClassSchemaBuilder implements SchemaBuilderInterface
                 properties: $properties
             );
         } catch (ReflectionException $err) {
-            throw OpenAPIException::reflection($err);
+            throw new ReflectionErrorException($err);
         }
     }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Raxos\OpenAPI\Attribute;
 
 use Attribute;
-use Raxos\OpenAPI\Contract\AttributeInterface;
+use Raxos\Contract\OpenAPI\AttributeInterface;
 use Raxos\OpenAPI\Definition\ExternalDocumentation;
 
 /**

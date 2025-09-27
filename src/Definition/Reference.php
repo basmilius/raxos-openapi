@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Raxos\OpenAPI\Definition;
 
-use Raxos\OpenAPI\Contract\DefinitionInterface;
+use Raxos\Contract\OpenAPI\DefinitionInterface;
 
 /**
  * Class Reference
