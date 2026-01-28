@@ -37,6 +37,6 @@
         "raxos/foundation": "*",
         "raxos/http": "*",
         "raxos/router": "*",
-        "symfony/yaml": "^7.3"
+        "symfony/yaml": "^8.0"
     }
 }
