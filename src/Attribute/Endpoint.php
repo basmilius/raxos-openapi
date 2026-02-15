@@ -31,6 +31,7 @@ final readonly class Endpoint implements AttributeInterface
      * @param class-string|null $requestModel
      * @param string|null $requestModelDescription
      * @param bool|null $requestModelRequired
+     * @param Response[]|null $responses
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
@@ -45,7 +46,8 @@ final readonly class Endpoint implements AttributeInterface
         public ?array $security = null,
         public ?string $requestModel = null,
         public ?string $requestModelDescription = null,
-        public ?bool $requestModelRequired = null
+        public ?bool $requestModelRequired = null,
+        public ?array $responses = null
     ) {}
 
 }

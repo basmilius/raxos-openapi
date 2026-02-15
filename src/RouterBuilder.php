@@ -7,12 +7,13 @@ use Generator;
 use Raxos\Collection\Map;
 use Raxos\Contract\Collection\MapInterface;
 use Raxos\Contract\Http\HttpRequestModelInterface;
-use Raxos\Contract\OpenAPI\OpenAPIExceptionInterface;
+use Raxos\Contract\OpenAPI\{OpenAPIExceptionInterface, ParameterizedMiddlewareInterface};
 use Raxos\Contract\Router\{FrameInterface, RouterInterface};
 use Raxos\OpenAPI\Attribute as Attr;
 use Raxos\OpenAPI\Definition\{MediaType, Operation, Parameter, Path, RequestBody, Response};
 use Raxos\OpenAPI\Enum\In;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
+use Raxos\Router\Attribute\MapQuery;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Frame\{ControllerFrame, FrameStack, RouteFrame};
 use ReflectionAttribute;
@@ -20,14 +21,19 @@ use ReflectionClass;
 use ReflectionException;
 use function array_filter;
 use function array_find;
-use function array_key_first;
+use function array_first;
+use function array_key_exists;
 use function array_map;
+use function array_merge;
 use function array_values;
 use function is_subclass_of;
 use function iterator_to_array;
 use function str_contains;
 use function str_replace;
+use function strcmp;
+use function strlen;
 use function strtolower;
+use function usort;
 
 /**
  * Class RouterBuilder
@@ -77,8 +83,10 @@ final class RouterBuilder
             $this->path($route);
         }
 
-        foreach ($this->router->dynamicRoutes as $route) {
-            $this->path($route);
+        foreach ($this->router->dynamicRoutes as $routes) {
+            foreach ($routes as $route) {
+                $this->path($route);
+            }
         }
     }
 
@@ -128,7 +136,26 @@ final class RouterBuilder
                 ), $endpoint->parameters ?? []),
             ];
 
+            foreach ($handler->getParameters() as $parameter) {
+                $mapQuery = $parameter->getAttributes(MapQuery::class)[0] ?? null;
+
+                if ($mapQuery === null) {
+                    continue;
+                }
+
+                $parameters[] = new Parameter(
+                    name: $parameter->name,
+                    in: In::QUERY,
+                    required: false
+                );
+            }
+
             $responses = array_map(static fn(ReflectionAttribute $attr) => $attr->newInstance(), $handler->getAttributes(Attr\Response::class));
+
+            if ($endpoint->responses !== null) {
+                $responses = array_merge($responses, $endpoint->responses);
+            }
+
             $responses = iterator_to_array($this->responses($responses));
 
             $requestBody = null;
@@ -204,6 +231,16 @@ final class RouterBuilder
                 default => []
             };
 
+            if ($frame instanceof RouteFrame) {
+                foreach ($frame->route->middlewares as $middleware) {
+                    if (!is_subclass_of($middleware->class, ParameterizedMiddlewareInterface::class)) {
+                        continue;
+                    }
+
+                    yield from $middleware->class::generateParameters();
+                }
+            }
+
             if (empty($parameters)) {
                 continue;
             }
@@ -232,11 +269,21 @@ final class RouterBuilder
     {
         $operations = [];
 
-        $stack = $route[array_key_first($route)];
+        if (array_key_exists('segments', $route)) {
+            unset($route['segments']);
+        }
+
+        $stack = array_first($route);
+        /** @var Parameter[] $parameters */
         $parameters = array_values(iterator_to_array($this->parameters($stack)));
+        $pathParameters = array_filter($parameters, static fn(Parameter $parameter) => $parameter->in === In::PATH);
+
+        usort($parameters, fn(Parameter $a, Parameter $b) => ($this->sortByIn($a->in) <=> $this->sortByIn($b->in)) ?: strcmp($a->name, $b->name));
+        usort($pathParameters, fn(Parameter $a, Parameter $b) => strlen($b->name) <=> strlen($a->name));
+
         $path = $stack->pathPlain;
 
-        foreach ($parameters as $parameter) {
+        foreach ($pathParameters as $parameter) {
             $path = str_replace("\${$parameter->name}", "{{$parameter->name}}", $path);
         }
 
@@ -282,6 +329,25 @@ final class RouterBuilder
         foreach ($responses as $response) {
             yield $response->code->value => $this->builder->response($response);
         }
+    }
+
+    /**
+     * Returns the sorting order for the In enum.
+     *
+     * @param In $in
+     *
+     * @return int
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.1.0
+     */
+    private function sortByIn(In $in): int
+    {
+        return match ($in) {
+            In::PATH => 0,
+            In::QUERY => 1,
+            In::HEADER => 2,
+            In::COOKIE => 3,
+        };
     }
 
 }

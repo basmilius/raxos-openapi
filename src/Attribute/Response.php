@@ -6,6 +6,7 @@ namespace Raxos\OpenAPI\Attribute;
 use Attribute;
 use Raxos\Contract\OpenAPI\AttributeInterface;
 use Raxos\Http\HttpResponseCode;
+use Raxos\OpenAPI\Definition\MediaType;
 
 /**
  * Class Response
@@ -24,6 +25,8 @@ final readonly class Response implements AttributeInterface
      * @param HttpResponseCode $code
      * @param string|null $description
      * @param class-string|null $model
+     * @param string|null $modelGeneric
+     * @param array<string, MediaType>|null $content
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
@@ -31,7 +34,9 @@ final readonly class Response implements AttributeInterface
     public function __construct(
         public HttpResponseCode $code,
         public ?string $description = null,
-        public ?string $model = null
+        public ?string $model = null,
+        public ?string $modelGeneric = null,
+        public ?array $content = null
     ) {}
 
 }

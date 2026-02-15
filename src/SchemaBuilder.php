@@ -14,13 +14,16 @@ use Raxos\OpenAPI\Attribute as Attr;
 use Raxos\OpenAPI\Definition\{MediaType, Reference, Response, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
-use Raxos\OpenAPI\Schema\{ClassSchemaBuilder, DateTimeSchemaBuilder, EnumSchemaBuilder, FloatSchemaBuilder, IntegerSchemaBuilder, JsonSchemaBuilder, ModelSchemaBuilder, RequestModelSchemaBuilder, StringSchemaBuilder};
+use Raxos\OpenAPI\Schema\{BuiltinSchemaBuilder, ClassSchemaBuilder, DateTimeSchemaBuilder, EnumSchemaBuilder, FloatSchemaBuilder, IntegerSchemaBuilder, JsonSchemaBuilder, ModelSchemaBuilder, RequestModelSchemaBuilder, StringSchemaBuilder};
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
+use function in_array;
 use function is_subclass_of;
 use function json_encode;
+use function Raxos\Foundation\singleton;
+use function str_replace;
 
 /**
  * Class SchemaBuilder
@@ -71,14 +74,29 @@ final readonly class SchemaBuilder
             }
 
             $schema = match (true) {
-                JsonSchemaBuilder::can([$class->name]) => new JsonSchemaBuilder()->build($this, $schemaAttr, [$class->name], $nullable),
-                default => new ClassSchemaBuilder()->build($this, $schemaAttr, [$class->name], $nullable),
+                JsonSchemaBuilder::can([$class->name]) => singleton(JsonSchemaBuilder::class)->build($this, $schemaAttr, [$class->name], $nullable),
+                default => singleton(ClassSchemaBuilder::class)->build($this, $schemaAttr, [$class->name], $nullable),
             };
 
-            $this->schemas->set($class->name, $schema);
+            $this->schemas->set($this->schemaId($class->name), $schema);
         } catch (ReflectionException $err) {
             throw new ReflectionErrorException($err);
         }
+    }
+
+    /**
+     * Builds a schema for a builtin type.
+     *
+     * @param Attr\Response $responseAttr
+     *
+     * @return Reference|Response|Schema|null
+     * @throws OpenAPIExceptionInterface
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.1.0
+     */
+    public function buildBuiltIn(Attr\Response $responseAttr): Reference|Response|Schema|null
+    {
+        return BuiltinSchemaBuilder::build($this, $responseAttr->model, $responseAttr->modelGeneric);
     }
 
     /**
@@ -106,7 +124,7 @@ final readonly class SchemaBuilder
             $aliasAttr = $aliasAttr?->newInstance();
 
             /** @var ReflectionAttribute<ORM\Column> $columnAttr */
-            $columnAttr = $property->getAttributes(ORM\Column::class)[0] ?? null;
+            $columnAttr = $property->getAttributes(ORM\Column::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
             $columnAttr = $columnAttr?->newInstance();
 
             /** @var ReflectionAttribute<Attr\Schema> $schemaAttr */
@@ -153,7 +171,7 @@ final readonly class SchemaBuilder
         $types = ReflectionUtil::getTypes($property->getType());
         $nullable = ($types[1] ?? false) === 'null';
 
-        return $this->buildSchema($schemaAttr, $types, $nullable);
+        return $this->auto($schemaAttr, $types, $nullable);
     }
 
     /**
@@ -171,10 +189,11 @@ final readonly class SchemaBuilder
     {
         static $nullableSchema = new Schema(nullable: true);
 
-        $ref = new Reference("#/components/schemas/{$class}");
+        $schemaId = $this->schemaId($class);
+        $ref = new Reference("#/components/schemas/{$schemaId}");
 
-        if ($this->schemas->has($class)) {
-            $schema = $this->schemas->get($class);
+        if ($this->schemas->has($schemaId)) {
+            $schema = $this->schemas->get($schemaId);
 
             if ($nullable && $schema->nullable !== true) {
                 return new Schema(
@@ -188,9 +207,9 @@ final readonly class SchemaBuilder
             return $ref;
         }
 
-        $this->build($class);
+        $this->build($class, $nullable);
 
-        if (!$this->schemas->has($class)) {
+        if (!$this->schemas->has($schemaId)) {
             return null;
         }
 
@@ -202,30 +221,34 @@ final readonly class SchemaBuilder
      *
      * @param Attr\Response $responseAttr
      *
-     * @return Reference|Response|null
+     * @return Reference|Response|Schema|null
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    public function response(Attr\Response $responseAttr): Reference|Response|null
+    public function response(Attr\Response $responseAttr): Reference|Response|Schema|null
     {
-        $content = null;
+        $content = $responseAttr->content;
+
+        if ($responseAttr->model !== null && in_array($responseAttr->model, BuiltinSchemaBuilder::BUILTINS, true)) {
+            return $this->buildBuiltIn($responseAttr);
+        }
 
         if ($responseAttr->model !== null && is_subclass_of($responseAttr->model, JsonSerializable::class)) {
-            if ($this->responses->has($responseAttr->model)) {
-                return new Reference("#/components/responses/{$responseAttr->model}");
+            $schemaId = $this->schemaId($responseAttr->model);
+
+            if ($this->responses->has($schemaId)) {
+                return new Reference("#/components/responses/{$schemaId}");
             }
 
             $schema = $this->reference($responseAttr->model);
 
             if ($schema !== null) {
-                $content = [];
-                $content['application/json'] = new MediaType(
-                    $this->reference($responseAttr->model)
-                );
+                $content ??= [];
+                $content['application/json'] = new MediaType($schema);
             }
 
-            $this->responses->set($responseAttr->model, new Response(
+            $this->responses->set($schemaId, new Response(
                 description: $responseAttr->description,
                 content: $content
             ));
@@ -250,13 +273,14 @@ final readonly class SchemaBuilder
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
+     * @internal
      */
-    private function buildSchema(Attr\Schema $schemaAttr, array $types, bool $nullable = false): Reference|Schema|null
+    public function auto(Attr\Schema $schemaAttr, array $types, bool $nullable = false): Reference|Schema|null
     {
         $direct = match (true) {
-            DateTimeSchemaBuilder::can($types) => new DateTimeSchemaBuilder()->build($this, $schemaAttr, $types, $nullable),
-            ModelSchemaBuilder::can($types) => new ModelSchemaBuilder()->build($this, $schemaAttr, $types, $nullable),
-            RequestModelSchemaBuilder::can($types) => new RequestModelSchemaBuilder()->build($this, $schemaAttr, $types, $nullable),
+            DateTimeSchemaBuilder::can($types) => singleton(DateTimeSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
+            ModelSchemaBuilder::can($types) => singleton(ModelSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
+            RequestModelSchemaBuilder::can($types) => singleton(RequestModelSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
             default => null
         };
 
@@ -265,26 +289,41 @@ final readonly class SchemaBuilder
         }
 
         $reference = match (true) {
-            EnumSchemaBuilder::can($types) => new EnumSchemaBuilder()->build($this, $schemaAttr, $types, $nullable),
-            JsonSchemaBuilder::can($types) => new JsonSchemaBuilder()->build($this, $schemaAttr, $types, $nullable),
+            EnumSchemaBuilder::can($types) => singleton(EnumSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
+            JsonSchemaBuilder::can($types) => singleton(JsonSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
             default => null
         };
 
         if ($reference !== null) {
-            $this->schemas->set($types[0], $reference);
+            $schemaId = $this->schemaId($types[0]);
+            $this->schemas->set($schemaId, $reference);
 
-            return new Reference("#/components/schemas/{$types[0]}");
+            return new Reference("#/components/schemas/{$schemaId}");
         }
 
         return match (true) {
-            FloatSchemaBuilder::can($types) => new FloatSchemaBuilder()->build($this, $schemaAttr, $types, $nullable),
-            IntegerSchemaBuilder::can($types) => new IntegerSchemaBuilder()->build($this, $schemaAttr, $types, $nullable),
-            StringSchemaBuilder::can($types) => new StringSchemaBuilder()->build($this, $schemaAttr, $types, $nullable),
+            FloatSchemaBuilder::can($types) => singleton(FloatSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
+            IntegerSchemaBuilder::can($types) => singleton(IntegerSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
+            StringSchemaBuilder::can($types) => singleton(StringSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
             default => new Schema(
                 type: SchemaType::STRING,
                 pattern: json_encode($types)
             )
         };
+    }
+
+    /**
+     * Returns the ID for the given class name.
+     *
+     * @param string $className
+     *
+     * @return string
+     * @author Bas Milius <bas@mili.us>
+     * @since 2.1.0
+     */
+    private function schemaId(string $className): string
+    {
+        return str_replace('\\', '.', $className);
     }
 
 }

@@ -43,7 +43,7 @@ final readonly class Schema implements DefinitionInterface
      * @param int|null $maxItems
      * @param int|null $minItems
      * @param bool|null $uniqueItems
-     * @param Schema|null $items
+     * @param Reference|Schema|null $items
      * @param Schema[]|null $properties
      * @param Schema[]|null $additionalProperties
      * @param string[]|null $required
@@ -76,7 +76,7 @@ final readonly class Schema implements DefinitionInterface
         public ?int $maxItems = null,
         public ?int $minItems = null,
         public ?bool $uniqueItems = null,
-        public ?Schema $items = null,
+        public Reference|Schema|null $items = null,
         public ?array $properties = null,
         public ?array $additionalProperties = null,
         public ?array $required = null,
