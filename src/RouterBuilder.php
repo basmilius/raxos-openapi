@@ -26,6 +26,7 @@ use function array_key_exists;
 use function array_map;
 use function array_merge;
 use function array_values;
+use function in_array;
 use function is_subclass_of;
 use function iterator_to_array;
 use function str_contains;
@@ -59,6 +60,7 @@ final class RouterBuilder
      * @param RouterInterface $router
      * @param MapInterface<string, Path> $paths
      * @param SchemaBuilder $builder
+     * @param class-string[]|null $controllers
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
@@ -66,7 +68,8 @@ final class RouterBuilder
     public function __construct(
         public RouterInterface $router,
         public MapInterface $paths = new Map(),
-        public SchemaBuilder $builder = new SchemaBuilder()
+        public SchemaBuilder $builder = new SchemaBuilder(),
+        public ?array $controllers = null
     ) {}
 
     /**
@@ -108,6 +111,10 @@ final class RouterBuilder
             $frame = array_find($stack->frames, static fn(FrameInterface $frame) => $frame instanceof RouteFrame);
 
             if ($frame === null) {
+                return null;
+            }
+
+            if ($this->controllers !== null && !in_array($frame->route->class, $this->controllers, true)) {
                 return null;
             }
 
