@@ -18,7 +18,7 @@ final readonly class ExternalDocumentation implements DefinitionInterface
 {
 
     /**
-     * ExternalDocumentation conDefinitionor.
+     * ExternalDocumentation constructor.
      *
      * @param string $description
      * @param string $url

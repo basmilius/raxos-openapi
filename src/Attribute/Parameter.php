@@ -11,7 +11,7 @@ use Raxos\OpenAPI\Enum\In;
  * Class Parameter
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Attribute
  * @since 1.7.0
  */
 #[Attribute(Attribute::TARGET_PARAMETER | Attribute::TARGET_PROPERTY)]
@@ -19,7 +19,7 @@ final readonly class Parameter implements AttributeInterface
 {
 
     /**
-     * Parameter conDefinitionor.
+     * Parameter constructor.
      *
      * @param string $name
      * @param In $in

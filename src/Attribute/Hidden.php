@@ -14,4 +14,4 @@ use Raxos\Contract\OpenAPI\AttributeInterface;
  * @since 1.7.0
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-final class Hidden implements AttributeInterface {}
+final readonly class Hidden implements AttributeInterface {}

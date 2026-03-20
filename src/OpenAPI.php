@@ -75,13 +75,14 @@ final class OpenAPI implements DefinitionInterface
      * Returns the OpenAPI spec as YAML.
      *
      * @return string
+     * @throws JsonException
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */
     public function getYAML(): string
     {
         $yaml = Yaml::dump(
-            json_decode(json_encode($this), true),
+            json_decode(json_encode($this, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR),
             inline: 99,
             indent: 2,
             flags: Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE | Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK

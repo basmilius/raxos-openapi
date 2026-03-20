@@ -11,14 +11,14 @@ use function array_filter;
  * Class Contact
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class Contact implements DefinitionInterface
 {
 
     /**
-     * Contact conDefinitionor.
+     * Contact constructor.
      *
      * @param string $name
      * @param string|null $email

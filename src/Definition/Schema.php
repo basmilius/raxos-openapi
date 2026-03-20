@@ -120,7 +120,7 @@ final readonly class Schema implements DefinitionInterface
             'required' => $this->required,
             'maxProperties' => $this->maxProperties,
             'minProperties' => $this->minProperties
-        ], DefinitionHelper::isNotEmpty(...));
+        ], DefinitionHelper::isNotNull(...));
     }
 
 }

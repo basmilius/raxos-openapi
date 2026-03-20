@@ -35,7 +35,17 @@ final readonly class EnumSchemaBuilder implements SchemaBuilderInterface
 
         assert(is_subclass_of($enum, BackedEnum::class));
 
-        $value = $enum::cases()[0]->value;
+        $cases = $enum::cases();
+
+        if (empty($cases)) {
+            return new Schema(
+                type: SchemaType::STRING,
+                nullable: $nullable,
+                enum: []
+            );
+        }
+
+        $value = $cases[0]->value;
 
         return new Schema(
             type: is_string($value) ? SchemaType::STRING : SchemaType::INTEGER,

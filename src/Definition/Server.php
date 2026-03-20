@@ -11,14 +11,14 @@ use function array_filter;
  * Class Server
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class Server implements DefinitionInterface
 {
 
     /**
-     * Server conDefinitionor.
+     * Server constructor.
      *
      * @param string $url
      * @param string|null $description

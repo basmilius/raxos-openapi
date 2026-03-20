@@ -12,14 +12,14 @@ use function array_filter;
  * Class Parameter
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class Parameter implements DefinitionInterface
 {
 
     /**
-     * Parameter conDefinitionor.
+     * Parameter constructor.
      *
      * @param string $name
      * @param In $in
@@ -54,7 +54,7 @@ final readonly class Parameter implements DefinitionInterface
             'required' => $this->required,
             'deprecated' => $this->deprecated,
             'allowEmptyValue' => $this->allowEmptyValue
-        ], DefinitionHelper::isNotEmpty(...));
+        ], DefinitionHelper::isNotNull(...));
     }
 
 }

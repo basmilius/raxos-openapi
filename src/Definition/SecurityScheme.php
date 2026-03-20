@@ -12,14 +12,14 @@ use function array_filter;
  * Class SecurityScheme
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class SecurityScheme implements DefinitionInterface
 {
 
     /**
-     * SecurityScheme conDefinitionor.
+     * SecurityScheme constructor.
      *
      * @param SecurityType $type
      * @param SecuritySchemeType|null $scheme

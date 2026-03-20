@@ -18,7 +18,7 @@ final readonly class Info implements DefinitionInterface
 {
 
     /**
-     * Info conDefinitionor.
+     * Info constructor.
      *
      * @param string $title
      * @param string $version

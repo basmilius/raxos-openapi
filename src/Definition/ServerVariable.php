@@ -11,14 +11,14 @@ use function array_filter;
  * Class ServerVariable
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class ServerVariable implements DefinitionInterface
 {
 
     /**
-     * ServerVariable conDefinitionor.
+     * ServerVariable constructor.
      *
      * @param string|int|null $default
      * @param string|null $description

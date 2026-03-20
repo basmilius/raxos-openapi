@@ -18,7 +18,7 @@ final readonly class License implements DefinitionInterface
 {
 
     /**
-     * License conDefinitionor.
+     * License constructor.
      *
      * @param string $name
      * @param string|null $url

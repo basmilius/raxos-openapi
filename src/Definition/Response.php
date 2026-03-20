@@ -11,14 +11,14 @@ use function array_filter;
  * Class Response
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class Response implements DefinitionInterface
 {
 
     /**
-     * Response conDefinitionor.
+     * Response constructor.
      *
      * @param string|null $description
      * @param array<string, string|string[]>|null $headers

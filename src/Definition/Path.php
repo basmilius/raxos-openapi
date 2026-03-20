@@ -11,14 +11,14 @@ use function array_filter;
  * Class Path
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class Path implements DefinitionInterface
 {
 
     /**
-     * Path conDefinitionor.
+     * Path constructor.
      *
      * @param string|null $summary
      * @param string|null $description

@@ -22,7 +22,7 @@ final readonly class Components implements DefinitionInterface
     public ?array $schemas;
 
     /**
-     * Components conDefinitionor.
+     * Components constructor.
      *
      * @param array<string, Response>|null $responses
      * @param array<string, Schema>|null $schemas
@@ -39,13 +39,15 @@ final readonly class Components implements DefinitionInterface
     {
         if ($responses !== null) {
             ksort($responses);
-            $this->responses = $responses;
         }
+
+        $this->responses = $responses;
 
         if ($schemas !== null) {
             ksort($schemas);
-            $this->schemas = $schemas;
         }
+
+        $this->schemas = $schemas;
     }
 
     /**

@@ -11,14 +11,14 @@ use function array_filter;
  * Class Operation
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class Operation implements DefinitionInterface
 {
 
     /**
-     * Operation conDefinitionor.
+     * Operation constructor.
      *
      * @param string|null $summary
      * @param string|null $description
@@ -65,7 +65,7 @@ final readonly class Operation implements DefinitionInterface
             'responses' => $this->responses,
             'deprecated' => $this->deprecated,
             'security' => $this->security
-        ], DefinitionHelper::isNotEmpty(...));
+        ], DefinitionHelper::isNotNull(...));
     }
 
 }

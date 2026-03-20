@@ -26,7 +26,7 @@ use function str_replace;
 use function str_starts_with;
 
 /**
- * Class StringSchemaBuilder
+ * Class JsonSchemaBuilder
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\OpenAPI\Schema
@@ -148,12 +148,12 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
      * @param SchemaBuilder $builder
      * @param string[]|string $type
      *
-     * @return Schema|null
+     * @return Reference|Schema|null
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    private function resolve(SchemaBuilder $builder, array|string $type): ?Schema
+    private function resolve(SchemaBuilder $builder, array|string $type): Reference|Schema|null
     {
         if (is_array($type)) {
             if (count($type) > 1) {

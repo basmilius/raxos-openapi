@@ -11,14 +11,14 @@ use function array_filter;
  * Class Tag
  *
  * @author Bas Milius <bas@mili.us>
- * @package Definition
+ * @package Raxos\OpenAPI\Definition
  * @since 1.7.0
  */
 final readonly class Tag implements DefinitionInterface
 {
 
     /**
-     * Tag conDefinitionor.
+     * Tag constructor.
      *
      * @param string $name
      * @param string $description
