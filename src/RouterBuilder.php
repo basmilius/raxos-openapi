@@ -9,13 +9,15 @@ use Raxos\Contract\Collection\MapInterface;
 use Raxos\Contract\Http\HttpRequestModelInterface;
 use Raxos\Contract\OpenAPI\{OpenAPIExceptionInterface, ParameterizedMiddlewareInterface};
 use Raxos\Contract\Router\{FrameInterface, RouterInterface};
+use Raxos\Contract\Search\StructuredFilterInterface;
 use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\{MediaType, Operation, Parameter, Path, RequestBody, Response};
-use Raxos\OpenAPI\Enum\In;
+use Raxos\OpenAPI\Definition\{MediaType, Operation, Parameter, Path, RequestBody, Response, Schema};
+use Raxos\OpenAPI\Enum\{In, SchemaType, StringFormat};
 use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\Router\Attribute\MapQuery;
 use Raxos\Router\Definition\Injectable;
 use Raxos\Router\Frame\{ControllerFrame, FrameStack, RouteFrame};
+use Raxos\Search\Attribute\Filter as SearchFilter;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
@@ -155,6 +157,43 @@ final class RouterBuilder
                     in: In::QUERY,
                     required: false
                 );
+            }
+
+            $filterParams = $handler->getAttributes(Attr\FilterParams::class)[0] ?? null;
+
+            if ($filterParams !== null) {
+                $model = $filterParams->newInstance()->model;
+                $existing = array_map(
+                    static fn(Parameter $parameter) => $parameter->name,
+                    array_filter($parameters, static fn(Parameter $parameter) => $parameter->in === In::QUERY)
+                );
+
+                foreach (new ReflectionClass($model)->getAttributes(SearchFilter::class) as $filterAttribute) {
+                    $filterAttribute = $filterAttribute->newInstance();
+                    $filter = $filterAttribute->filter;
+
+                    if (!($filter instanceof StructuredFilterInterface)) {
+                        continue;
+                    }
+
+                    foreach ($filter->describe($filterAttribute->property) as $spec) {
+                        if (in_array($spec['name'], $existing, true)) {
+                            continue;
+                        }
+
+                        $existing[] = $spec['name'];
+                        $parameters[] = new Parameter(
+                            name: $spec['name'],
+                            in: In::QUERY,
+                            required: false,
+                            schema: new Schema(
+                                type: SchemaType::from($spec['type']),
+                                format: isset($spec['format']) ? StringFormat::from($spec['format']) : null,
+                                enum: $spec['enum'] ?? null
+                            )
+                        );
+                    }
+                }
             }
 
             $responses = array_map(static fn(ReflectionAttribute $attr) => $attr->newInstance(), $handler->getAttributes(Attr\Response::class));

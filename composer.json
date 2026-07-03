@@ -37,6 +37,7 @@
         "raxos/foundation": "*",
         "raxos/http": "*",
         "raxos/router": "*",
+        "raxos/search": "*",
         "symfony/yaml": "^8.0"
     }
 }

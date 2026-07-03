@@ -27,6 +27,7 @@ final readonly class Parameter implements DefinitionInterface
      * @param bool $required
      * @param bool $deprecated
      * @param bool $allowEmptyValue
+     * @param Schema|null $schema
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
@@ -37,7 +38,8 @@ final readonly class Parameter implements DefinitionInterface
         public ?string $description = null,
         public bool $required = false,
         public bool $deprecated = false,
-        public bool $allowEmptyValue = false
+        public bool $allowEmptyValue = false,
+        public ?Schema $schema = null
     ) {}
 
     /**
@@ -53,7 +55,8 @@ final readonly class Parameter implements DefinitionInterface
             'description' => $this->description,
             'required' => $this->required,
             'deprecated' => $this->deprecated,
-            'allowEmptyValue' => $this->allowEmptyValue
+            'allowEmptyValue' => $this->allowEmptyValue,
+            'schema' => $this->schema
         ], DefinitionHelper::isNotNull(...));
     }
 

@@ -34,7 +34,7 @@ final readonly class Schema implements DefinitionInterface
      * @param int|null $minLength
      * @param string|null $pattern
      * @param NumberFormat|StringFormat|null $format
-     * @param string[]|null $enum
+     * @param array<int, string|int>|null $enum
      * @param int|null $maximum
      * @param int|null $minimum
      * @param bool|null $exclusiveMaximum
