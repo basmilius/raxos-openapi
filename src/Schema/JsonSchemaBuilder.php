@@ -15,15 +15,14 @@ use ReflectionClass;
 use ReflectionException;
 use Throwable;
 use function array_map;
-use function array_merge;
-use function class_exists;
 use function count;
-use function explode;
-use function is_array;
 use function is_subclass_of;
-use function preg_match_all;
-use function str_replace;
+use function preg_match;
+use function str_ends_with;
 use function str_starts_with;
+use function strlen;
+use function substr;
+use function trim;
 
 /**
  * Class JsonSchemaBuilder
@@ -76,104 +75,76 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
     }
 
     /**
-     * Builds a schema for a type.
+     * Resolves ArrayShape types, preserving nested lists, dictionaries and unions.
      *
-     * @param SchemaBuilder $builder
-     * @param string $type
-     *
-     * @return Schema|null
-     * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      */
-    private function ofType(SchemaBuilder $builder, string $type): ?Schema
+    private function ofType(SchemaBuilder $builder, string $type): Reference|Schema|null
     {
-        /** @noinspection RegExpRedundantEscape */
-        /** @noinspection RegExpUnnecessaryNonCapturingGroup */
-        $pattern = '/(?:^|\n)(?:array<string,\s*)?([\\\\a-zA-Z]+(?:\\\\[a-zA-Z]+)*(?:\|[\\\\a-zA-Z]+(?:\\\\[a-zA-Z]+)*)*(?:\[\])?|[^>]+)(?:>)?/m';
+        $type = trim($type);
 
-        preg_match_all($pattern, $type, $matches);
-        $types = [];
-        foreach ($matches[1] as $match) {
-            $match = str_replace('[]', '', $match);
-            $types[] = explode('|', $match);
-        }
-
-        $types = array_merge(...$types);
-
-        if (empty($types)) {
+        if ($type === Throwable::class) {
             return null;
         }
 
-        if (str_starts_with($type, 'array<')) {
-            return new Schema(
-                type: SchemaType::ARRAY,
-                items: $this->resolve($builder, $types)
-            );
+        if (str_starts_with($type, '?')) {
+            $type = substr($type, 1) . '|null';
         }
 
-        if (count($types) === 1 || count($types) === 2) {
-            $schemaType = match ($types[0]) {
-                'array' => SchemaType::ARRAY,
-                'bool' => SchemaType::BOOLEAN,
-                'float' => SchemaType::NUMBER,
-                'int' => SchemaType::INTEGER,
-                'string' => SchemaType::STRING,
-                Throwable::class => null,
-                default => $this->resolve($builder, $types[0])
-            };
+        $types = $this->split($type, '|');
 
-            if ($schemaType === null) {
-                return null;
-            }
-
-            if ($schemaType instanceof Schema) {
-                return $schemaType;
-            }
-
-            return new Schema(
-                type: $schemaType,
-                nullable: ($types[1] ?? false) === 'null'
-            );
+        if (count($types) > 1) {
+            return new Schema(anyOf: array_map(fn(string $type): Reference|Schema|null => $this->ofType($builder, $type), $types));
         }
 
-        return new Schema(
-            oneOf: array_map(static fn(string $type) => $this->ofType($builder, $type), $types)
-        );
+        if (str_ends_with($type, '[]')) {
+            return new Schema(type: SchemaType::ARRAY, items: $this->ofType($builder, substr($type, 0, -2)));
+        }
+
+        if (preg_match('/^(array|list)<(.+)>$/', $type, $matches) === 1) {
+            $parts = $this->split($matches[2], ',');
+            $value = $parts[count($parts) - 1];
+            $schema = $this->ofType($builder, $value);
+
+            return count($parts) === 2 && $parts[0] === 'string'
+                ? new Schema(type: SchemaType::OBJECT, additionalProperties: $schema)
+                : new Schema(type: SchemaType::ARRAY, items: $schema);
+        }
+
+        return $builder->auto(new Attr\Property(), [$type]);
     }
 
     /**
-     * Resolves a subtype.
+     * Splits type expressions only outside nested generic brackets.
      *
-     * @param SchemaBuilder $builder
-     * @param string[]|string $type
-     *
-     * @return Reference|Schema|null
-     * @throws OpenAPIExceptionInterface
+     * @return string[]
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      */
-    private function resolve(SchemaBuilder $builder, array|string $type): Reference|Schema|null
+    private function split(string $type, string $separator): array
     {
-        if (is_array($type)) {
-            if (count($type) > 1) {
-                return new Schema(
-                    anyOf: array_map(fn(string $type) => $this->resolve($builder, $type), $type)
-                );
+        $parts = [];
+        $depth = 0;
+        $start = 0;
+        $length = strlen($type);
+
+        for ($index = 0; $index < $length; ++$index) {
+            $depth += match ($type[$index]) {
+                '<', '(' => 1,
+                '>', ')' => -1,
+                default => 0
+            };
+
+            if ($type[$index] === $separator && $depth === 0) {
+                $parts[] = trim(substr($type, $start, $index - $start));
+                $start = $index + 1;
             }
-
-            $type = $type[0];
         }
 
-        if (!class_exists($type)) {
-            return null;
-        }
+        $parts[] = trim(substr($type, $start));
 
-        if (is_subclass_of($type, JsonSerializable::class)) {
-            return $this->build($builder, new Attr\Model(), [$type], false);
-        }
-
-        return $builder->reference($type);
+        return $parts;
     }
 
     /**

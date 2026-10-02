@@ -14,14 +14,19 @@ use Raxos\OpenAPI\Attribute as Attr;
 use Raxos\OpenAPI\Definition\{MediaType, Reference, Response, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
-use Raxos\OpenAPI\Schema\{BuiltinSchemaBuilder, ClassSchemaBuilder, DateTimeSchemaBuilder, EnumSchemaBuilder, FloatSchemaBuilder, IntegerSchemaBuilder, JsonSchemaBuilder, ModelSchemaBuilder, RequestModelSchemaBuilder, StringSchemaBuilder};
+use Raxos\OpenAPI\Schema\{BuiltinSchemaBuilder, ClassSchemaBuilder, DateTimeSchemaBuilder, EnumSchemaBuilder, FloatSchemaBuilder, IntegerSchemaBuilder, JsonSchemaBuilder, StringSchemaBuilder};
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
+use function array_filter;
+use function array_map;
+use function array_values;
+use function class_exists;
+use function count;
+use function enum_exists;
 use function in_array;
 use function is_subclass_of;
-use function json_encode;
 use function Raxos\Foundation\singleton;
 use function str_replace;
 
@@ -62,25 +67,39 @@ final readonly class SchemaBuilder
      */
     public function build(string $class, bool $nullable = false): void
     {
+        $schemaId = $this->schemaId($class);
+
+        if ($this->schemas->has($schemaId)) {
+            return;
+        }
+
         try {
             $class = new ReflectionClass($class);
-
-            /** @var ReflectionAttribute<Attr\Schema> $schemaAttr */
             $schemaAttr = $class->getAttributes(Attr\Schema::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
             $schemaAttr = $schemaAttr?->newInstance();
+            $isEnum = EnumSchemaBuilder::can([$class->name]);
+            $isJson = JsonSchemaBuilder::can([$class->name]);
 
-            if ($schemaAttr === null) {
+            if ($schemaAttr === null && !$isEnum && !$isJson) {
                 return;
             }
 
-            $schema = match (true) {
-                JsonSchemaBuilder::can([$class->name]) => singleton(JsonSchemaBuilder::class)->build($this, $schemaAttr, [$class->name], $nullable),
-                default => singleton(ClassSchemaBuilder::class)->build($this, $schemaAttr, [$class->name], $nullable),
-            };
+            $schemaAttr ??= new Attr\Model();
 
-            $this->schemas->set($this->schemaId($class->name), $schema);
+            // Reserve the component before traversing properties that may point back to it.
+            $this->schemas->set($schemaId, new Schema(type: SchemaType::OBJECT));
+            $schema = match (true) {
+                $isEnum => singleton(EnumSchemaBuilder::class)->build($this, $schemaAttr, [$class->name], false),
+                $isJson => singleton(JsonSchemaBuilder::class)->build($this, $schemaAttr, [$class->name], false),
+                default => singleton(ClassSchemaBuilder::class)->build($this, $schemaAttr, [$class->name], false),
+            };
+            $this->schemas->set($schemaId, $schema);
         } catch (ReflectionException $err) {
+            $this->schemas->unset($schemaId);
             throw new ReflectionErrorException($err);
+        } catch (\Throwable $err) {
+            $this->schemas->unset($schemaId);
+            throw $err;
         }
     }
 
@@ -169,7 +188,7 @@ final readonly class SchemaBuilder
     public function property(ReflectionProperty $property, Attr\Schema $schemaAttr): Reference|Schema|null
     {
         $types = ReflectionUtil::getTypes($property->getType());
-        $nullable = ($types[1] ?? false) === 'null';
+        $nullable = in_array('null', $types, true);
 
         return $this->auto($schemaAttr, $types, $nullable);
     }
@@ -187,33 +206,18 @@ final readonly class SchemaBuilder
      */
     public function reference(string $class, bool $nullable = false): Reference|Schema|null
     {
-        static $nullableSchema = new Schema(nullable: true);
-
         $schemaId = $this->schemaId($class);
-        $ref = new Reference("#/components/schemas/{$schemaId}");
-
-        if ($this->schemas->has($schemaId)) {
-            $schema = $this->schemas->get($schemaId);
-
-            if ($nullable && $schema->nullable !== true) {
-                return new Schema(
-                    anyOf: [
-                        $ref,
-                        $nullableSchema
-                    ]
-                );
-            }
-
-            return $ref;
-        }
-
-        $this->build($class, $nullable);
+        $this->build($class);
 
         if (!$this->schemas->has($schemaId)) {
             return null;
         }
 
-        return $this->reference($class, $nullable);
+        $ref = new Reference("#/components/schemas/{$schemaId}");
+
+        return $nullable
+            ? new Schema(anyOf: [$ref, new Schema(type: SchemaType::NULL)])
+            : $ref;
     }
 
     /**
@@ -277,38 +281,41 @@ final readonly class SchemaBuilder
      */
     public function auto(Attr\Schema $schemaAttr, array $types, bool $nullable = false): Reference|Schema|null
     {
-        $direct = match (true) {
-            DateTimeSchemaBuilder::can($types) => singleton(DateTimeSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
-            ModelSchemaBuilder::can($types) => singleton(ModelSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
-            RequestModelSchemaBuilder::can($types) => singleton(RequestModelSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
-            default => null
-        };
+        $nullable = $nullable || in_array('null', $types, true);
+        $types = array_values(array_filter($types, static fn(string $type): bool => $type !== 'null'));
 
-        if ($direct !== null) {
-            return $direct;
+        if ($types === []) {
+            return new Schema(type: SchemaType::NULL);
         }
 
-        $reference = match (true) {
-            EnumSchemaBuilder::can($types) => singleton(EnumSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
-            JsonSchemaBuilder::can($types) => singleton(JsonSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
-            default => null
-        };
+        if (count($types) > 1) {
+            $schemas = array_map(fn(string $type): Reference|Schema|null => $this->auto($schemaAttr, [$type]), $types);
 
-        if ($reference !== null) {
-            $schemaId = $this->schemaId($types[0]);
-            $this->schemas->set($schemaId, $reference);
+            if ($nullable) {
+                $schemas[] = new Schema(type: SchemaType::NULL);
+            }
 
-            return new Reference("#/components/schemas/{$schemaId}");
+            return new Schema(anyOf: $schemas);
         }
 
-        return match (true) {
-            FloatSchemaBuilder::can($types) => singleton(FloatSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
-            IntegerSchemaBuilder::can($types) => singleton(IntegerSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
-            StringSchemaBuilder::can($types) => singleton(StringSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
-            default => new Schema(
-                type: SchemaType::STRING,
-                pattern: json_encode($types)
-            )
+        if (DateTimeSchemaBuilder::can($types)) {
+            return singleton(DateTimeSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable);
+        }
+
+        if (class_exists($types[0]) || enum_exists($types[0])) {
+            return $this->reference($types[0], $nullable) ?? new Schema(type: SchemaType::OBJECT, nullable: $nullable);
+        }
+
+        return match ($types[0]) {
+            'bool', 'boolean' => new Schema(type: SchemaType::BOOLEAN, nullable: $nullable),
+            'true' => new Schema(type: SchemaType::BOOLEAN, nullable: $nullable, enum: [true]),
+            'false' => new Schema(type: SchemaType::BOOLEAN, nullable: $nullable, enum: [false]),
+            'array', 'iterable' => new Schema(type: SchemaType::ARRAY, nullable: $nullable),
+            'object' => new Schema(type: SchemaType::OBJECT, nullable: $nullable),
+            'float', 'double' => singleton(FloatSchemaBuilder::class)->build($this, $schemaAttr, ['float'], $nullable),
+            'int', 'integer' => singleton(IntegerSchemaBuilder::class)->build($this, $schemaAttr, ['int'], $nullable),
+            'string' => singleton(StringSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable),
+            default => new Schema(type: SchemaType::cases())
         };
     }
 
