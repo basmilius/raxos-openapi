@@ -40,7 +40,7 @@ final readonly class Encoding implements DefinitionInterface
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      */
     public function jsonSerialize(): array
     {
@@ -50,7 +50,7 @@ final readonly class Encoding implements DefinitionInterface
             'style' => $this->style,
             'explode' => $this->explode,
             'allowReserved' => $this->allowReserved
-        ], DefinitionHelper::isNotEmpty(...));
+        ], DefinitionHelper::isNotNull(...));
     }
 
 }

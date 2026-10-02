@@ -56,7 +56,7 @@ final class BuiltinSchemaBuilder
      * @return Response
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 2.1.0
+     * @since 3.2.0
      */
     public static function buildArrayList(SchemaBuilder $builder, ?string $genericClass): Response
     {
@@ -64,7 +64,7 @@ final class BuiltinSchemaBuilder
             new Schema(
                 type: SchemaType::ARRAY,
                 items: $genericClass !== null
-                    ? $builder->reference($genericClass) ?? $builder->auto(new Attr\Model(), [$genericClass])
+                    ? $builder->auto(new Attr\Model(), [$genericClass])
                     : null
             )
         );
@@ -79,7 +79,7 @@ final class BuiltinSchemaBuilder
      * @return Response
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 2.1.0
+     * @since 3.2.0
      */
     public static function buildPaginated(SchemaBuilder $builder, ?string $genericClass): Response
     {
@@ -90,7 +90,7 @@ final class BuiltinSchemaBuilder
                     'items' => new Schema(
                         type: SchemaType::ARRAY,
                         items: $genericClass !== null
-                            ? $builder->reference($genericClass)
+                            ? $builder->auto(new Attr\Model(), [$genericClass])
                             : null
                     ),
                     'page' => new Schema(

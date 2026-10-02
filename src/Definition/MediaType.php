@@ -38,7 +38,7 @@ final readonly class MediaType implements DefinitionInterface
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      */
     public function jsonSerialize(): array
     {
@@ -47,7 +47,7 @@ final readonly class MediaType implements DefinitionInterface
             'example' => $this->example,
             'examples' => $this->examples,
             'encoding' => $this->encoding
-        ], DefinitionHelper::isNotEmpty(...));
+        ], DefinitionHelper::isNotNull(...));
     }
 
 }

@@ -38,11 +38,11 @@ final readonly class DateTimeSchemaBuilder implements SchemaBuilderInterface
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      */
     public static function can(array $types): bool
     {
-        return is_subclass_of($types[0], DateTimeInterface::class);
+        return $types[0] === DateTimeInterface::class || is_subclass_of($types[0], DateTimeInterface::class);
     }
 
 }

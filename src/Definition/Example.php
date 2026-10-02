@@ -38,7 +38,7 @@ final readonly class Example implements DefinitionInterface
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      */
     public function jsonSerialize(): array
     {
@@ -47,7 +47,7 @@ final readonly class Example implements DefinitionInterface
             'value' => $this->value,
             'description' => $this->description,
             'externalValue' => $this->externalValue,
-        ], DefinitionHelper::isNotEmpty(...));
+        ], DefinitionHelper::isNotNull(...));
     }
 
 }

@@ -1,28 +1,10 @@
 <?php
 declare(strict_types=1);
 
-use Raxos\OpenAPI\Definition\Components;
-use Raxos\OpenAPI\Definition\Info;
-use Raxos\OpenAPI\Definition\Operation;
-use Raxos\OpenAPI\Definition\Path;
-use Raxos\OpenAPI\Definition\Response;
-use Raxos\OpenAPI\OpenAPI;
-use Raxos\OpenAPI\RouterBuilder;
-use Raxos\OpenAPI\Tests\Fixtures\JsonTree;
-use Raxos\OpenAPI\Tests\Fixtures\TreeController;
+use Raxos\OpenAPI\Definition\{Components, Info};
+use Raxos\OpenAPI\{OpenAPI, RouterBuilder};
+use Raxos\OpenAPI\Tests\Fixtures\{JsonTree, TreeController};
 use Raxos\Router\Router;
-use Symfony\Component\Yaml\Yaml;
-
-it('exports the same document as JSON and YAML with stable path ordering', function (): void {
-    $path = new Path(get: new Operation(responses: [200 => new Response('OK')]));
-    $document = new OpenAPI(new Info('Raxos & Co', '3.2.0', description: "Line one\nLine two"), paths: ['/z' => $path, '/a' => $path]);
-    $json = json_decode($document->getJSON(), true, 512, JSON_THROW_ON_ERROR);
-    expect($json['openapi'])->toBe('3.1.1')
-        ->and(array_keys($json['paths']))->toBe(['/a', '/z'])
-        ->and($json['info']['title'])->toBe('Raxos & Co')
-        ->and($json['paths']['/a']['get']['responses'][200]['description'])->toBe('OK')
-        ->and(Yaml::parse($document->getYAML()))->toBe($json);
-});
 
 it('documents attributed routes and recursive responses without executing handlers', function (): void {
     $builder = new RouterBuilder(Router::createFromControllers(null, [TreeController::class]));

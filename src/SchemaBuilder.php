@@ -228,7 +228,7 @@ final readonly class SchemaBuilder
      * @return Reference|Response|Schema|null
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      */
     public function response(Attr\Response $responseAttr): Reference|Response|Schema|null
     {
@@ -241,10 +241,6 @@ final readonly class SchemaBuilder
         if ($responseAttr->model !== null && is_subclass_of($responseAttr->model, JsonSerializable::class)) {
             $schemaId = $this->schemaId($responseAttr->model);
 
-            if ($this->responses->has($schemaId)) {
-                return new Reference("#/components/responses/{$schemaId}");
-            }
-
             $schema = $this->reference($responseAttr->model);
 
             if ($schema !== null) {
@@ -252,12 +248,20 @@ final readonly class SchemaBuilder
                 $content['application/json'] = new MediaType($schema);
             }
 
-            $this->responses->set($schemaId, new Response(
+            $response = new Response(
                 description: $responseAttr->description,
                 content: $content
-            ));
+            );
 
-            return $this->response($responseAttr);
+            if ($this->responses->has($schemaId)) {
+                return $this->responses->get($schemaId) == $response
+                    ? new Reference("#/components/responses/{$schemaId}")
+                    : $response;
+            }
+
+            $this->responses->set($schemaId, $response);
+
+            return new Reference("#/components/responses/{$schemaId}");
         }
 
         return new Response(
@@ -276,7 +280,7 @@ final readonly class SchemaBuilder
      * @return Reference|Schema|null
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      * @internal
      */
     public function auto(Attr\Schema $schemaAttr, array $types, bool $nullable = false): Reference|Schema|null
@@ -303,7 +307,17 @@ final readonly class SchemaBuilder
         }
 
         if (class_exists($types[0]) || enum_exists($types[0])) {
-            return $this->reference($types[0], $nullable) ?? new Schema(type: SchemaType::OBJECT, nullable: $nullable);
+            $reference = $this->reference($types[0], $nullable);
+
+            if ($reference !== null) {
+                return $reference;
+            }
+
+            if (StringSchemaBuilder::can($types)) {
+                return singleton(StringSchemaBuilder::class)->build($this, $schemaAttr, $types, $nullable);
+            }
+
+            return new Schema(type: SchemaType::OBJECT, nullable: $nullable);
         }
 
         return match ($types[0]) {

@@ -153,7 +153,7 @@ final class RouterBuilder
                 }
 
                 $parameters[] = new Parameter(
-                    name: $parameter->name,
+                    name: $mapQuery->newInstance()->key ?? $parameter->name,
                     in: In::QUERY,
                     required: false
                 );
@@ -334,7 +334,9 @@ final class RouterBuilder
         }
 
         foreach ($route as $method => $stack) {
-            $operation = $this->operation($stack, $parameters);
+            $operationParameters = array_values(iterator_to_array($this->parameters($stack)));
+            usort($operationParameters, fn(Parameter $a, Parameter $b): int => ($this->sortByIn($a->in) <=> $this->sortByIn($b->in)) ?: strcmp($a->name, $b->name));
+            $operation = $this->operation($stack, $operationParameters);
 
             if ($operation === null) {
                 continue;
@@ -356,7 +358,7 @@ final class RouterBuilder
             head: $operations['head'] ?? null,
             patch: $operations['patch'] ?? null,
             trace: $operations['trace'] ?? null,
-            parameters: $parameters
+            parameters: array_values(array_filter($parameters, static fn(Parameter $parameter): bool => $parameter->in === In::PATH))
         ));
     }
 

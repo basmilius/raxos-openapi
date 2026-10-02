@@ -9,9 +9,9 @@ use Raxos\OpenAPI\Attribute as Attr;
 use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\SchemaBuilder;
+use ReflectionEnum;
 use function array_map;
 use function assert;
-use function is_string;
 use function is_subclass_of;
 
 /**
@@ -27,7 +27,7 @@ final readonly class EnumSchemaBuilder implements SchemaBuilderInterface
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 1.8.0
+     * @since 3.2.0
      */
     public function build(SchemaBuilder $builder, Attr\Schema $schemaAttr, array $types, bool $nullable): Reference|Schema|null
     {
@@ -35,21 +35,11 @@ final readonly class EnumSchemaBuilder implements SchemaBuilderInterface
 
         assert(is_subclass_of($enum, BackedEnum::class));
 
-        $cases = $enum::cases();
-
-        if (empty($cases)) {
-            return new Schema(
-                type: SchemaType::STRING,
-                nullable: $nullable,
-                enum: []
-            );
-        }
-
-        $value = $cases[0]->value;
-
         return new Schema(
-            type: is_string($value) ? SchemaType::STRING : SchemaType::INTEGER,
-            nullable: false,
+            type: new ReflectionEnum($enum)->getBackingType()?->getName() === 'int'
+                ? SchemaType::INTEGER
+                : SchemaType::STRING,
+            nullable: $nullable,
             enum: array_map(static fn(BackedEnum $value) => $value->value, $enum::cases()),
         );
     }
