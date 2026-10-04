@@ -22,12 +22,10 @@ enum UnitInteger: int
     case ZERO = 0;
     case ONE = 1;
 }
-enum UnitEmptyInteger: int
-{
-}
-enum UnitEmptyString: string
-{
-}
+
+enum UnitEmptyInteger: int {}
+
+enum UnitEmptyString: string {}
 
 final class UnitStringable implements Stringable
 {
@@ -52,11 +50,20 @@ final class UnitStringableModel implements Stringable
 #[API\Model]
 class UnitDto
 {
-    #[API\Property(alias: 'renamed')] public string $name;
-    #[API\Property] #[ORM\Hidden] public string $secret;
-    #[API\Property] #[ORM\Alias('alias')] public int $identifier;
-    #[API\Property] #[ORM\Alias('other')] #[ORM\Column('physical')] public bool $flag;
-    #[API\Property(schema: new \Raxos\OpenAPI\Definition\Schema(type: \Raxos\OpenAPI\Enum\SchemaType::STRING, pattern: '^A'))] public string $code;
+    #[API\Property(alias: 'renamed')]
+    public string $name;
+    #[API\Property]
+    #[ORM\Hidden]
+    public string $secret;
+    #[API\Property]
+    #[ORM\Alias('alias')]
+    public int $identifier;
+    #[API\Property]
+    #[ORM\Alias('other')]
+    #[ORM\Column('physical')]
+    public bool $flag;
+    #[API\Property(schema: new \Raxos\OpenAPI\Definition\Schema(type: \Raxos\OpenAPI\Enum\SchemaType::STRING, pattern: '^A'))]
+    public string $code;
     public string $undocumented;
 }
 
@@ -64,13 +71,16 @@ class UnitDto
 #[ORM\Table('unit_openapi')]
 final class UnitOrm extends Model
 {
-    #[ORM\PrimaryKey] #[API\Property] public int $id;
+    #[ORM\PrimaryKey]
+    #[API\Property]
+    public int $id;
 }
 
 #[API\Model]
 final class UnitRequest implements HttpRequestModelInterface
 {
-    #[API\Property] public string $name;
+    #[API\Property]
+    public string $name;
 }
 
 final class UnitShape implements JsonSerializable
@@ -93,5 +103,6 @@ final class UnitJsonWithoutShape implements JsonSerializable
 #[API\Model]
 final class UnitInvalidSchema
 {
-    #[API\Property(unknown: true)] public string $value;
+    #[API\Property(unknown: true)]
+    public string $value;
 }

@@ -21,10 +21,9 @@ final readonly class Required
      * Overrides inferred input requiredness, including rules that depend on runtime context.
      *
      * @param bool $required
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 3.3.0
      */
-    public function __construct(public bool $required = true)
-    {
-    }
+    public function __construct(public bool $required = true) {}
 }

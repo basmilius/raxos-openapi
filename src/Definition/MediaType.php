@@ -32,9 +32,7 @@ final readonly class MediaType implements DefinitionInterface
         public mixed $example = null,
         public ?array $examples = null,
         public ?array $encoding = null
-    )
-    {
-    }
+    ) {}
 
     /**
      * {@inheritdoc}

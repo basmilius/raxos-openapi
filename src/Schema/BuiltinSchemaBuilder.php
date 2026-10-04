@@ -131,6 +131,7 @@ final class BuiltinSchemaBuilder
      *
      * @param SchemaBuilder $builder
      * @param string|null $genericClass
+     *
      * @return Response
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>

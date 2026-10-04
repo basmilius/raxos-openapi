@@ -12,9 +12,7 @@ use Raxos\OpenAPI\Enum\SchemaType;
 
 final readonly class ContractAddress implements HttpRequestModelInterface
 {
-    public function __construct(#[Property] #[C\MinLength(2)] public string $city)
-    {
-    }
+    public function __construct(#[Property] #[C\MinLength(2)] public string $city) {}
 }
 
 #[API\Model]
@@ -29,8 +27,7 @@ final readonly class ContractRequest implements HttpRequestModelInterface
         #[Property] public ?string $requiredNullable,
         #[Property(optional: true)] public ?string $note = null,
         #[Property(optional: true)] public int $limit = 5,
-    ) {
-    }
+    ) {}
 }
 
 final readonly class ConditionalContract implements HttpRequestModelInterface
@@ -40,8 +37,7 @@ final readonly class ConditionalContract implements HttpRequestModelInterface
         #[Property(optional: self::optional(...))] #[API\Required] public string $manual = 'default',
         #[Property] #[C\Matches('/^A/')] public string $pattern = 'A',
         #[Property] #[API\Property(schema: new Schema(type: SchemaType::STRING, pattern: '^B'))] public string $explicit = 'B',
-    ) {
-    }
+    ) {}
 
     public static function optional(): bool
     {

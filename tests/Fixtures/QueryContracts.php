@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+
 namespace RaxosTests\OpenAPI;
 
 use Raxos\OpenAPI\Attribute as API;

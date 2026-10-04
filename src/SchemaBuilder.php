@@ -65,9 +65,7 @@ final readonly class SchemaBuilder
         public private(set) MapInterface $responses = new Map(),
         public private(set) MapInterface $schemas = new Map(),
         public private(set) MapInterface $diagnostics = new Map()
-    )
-    {
-    }
+    ) {}
 
     /**
      * Builds a schema for the class.
@@ -252,6 +250,7 @@ final readonly class SchemaBuilder
      *
      * @param class-string $class
      * @param bool $nullable
+     *
      * @return Reference|Schema
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>

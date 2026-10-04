@@ -98,9 +98,7 @@ final class RouterBuilder
         public MapInterface $paths = new Map(),
         public SchemaBuilder $builder = new SchemaBuilder(),
         public ?array $controllers = null
-    )
-    {
-    }
+    ) {}
 
     /**
      * Builds paths from the router.

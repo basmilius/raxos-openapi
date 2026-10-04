@@ -34,9 +34,7 @@ final readonly class Encoding implements DefinitionInterface
         public ?string $style = null,
         public ?bool $explode = null,
         public ?bool $allowReserved = null
-    )
-    {
-    }
+    ) {}
 
     /**
      * {@inheritdoc}

@@ -19,5 +19,5 @@ it('interprets optional and nested ArrayShape types without executing serializat
         ->and($properties['list'])->toBe(['type' => 'array', 'items' => ['type' => 'integer', 'format' => 'int32']])
         ->and($properties['nested'])->toBe(['type' => 'object', 'additionalProperties' => ['type' => 'array', 'items' => ['anyOf' => [['type' => 'boolean'], ['type' => 'null']]]]]);
     expect(documentData($builder->build(new SchemaBuilder(), new A\Model(), [F\UnitJsonWithoutShape::class], false)))->toBe(['type' => 'object']);
-    expect(fn () => $builder->build(new SchemaBuilder(), new A\Model(), ['missing-class'], false))->toThrow(Raxos\OpenAPI\Error\ReflectionErrorException::class);
+    expect(fn() => $builder->build(new SchemaBuilder(), new A\Model(), ['missing-class'], false))->toThrow(Raxos\OpenAPI\Error\ReflectionErrorException::class);
 });

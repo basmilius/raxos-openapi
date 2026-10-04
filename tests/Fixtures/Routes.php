@@ -22,6 +22,7 @@ final readonly class UnitApiMiddleware implements ParameterizedMiddlewareInterfa
     {
         return $next($request);
     }
+
     public static function generateParameters(): Generator
     {
         yield 'auth' => new Parameter('X-Unit', In::HEADER, required: true);
@@ -32,9 +33,7 @@ final readonly class UnitApiMiddleware implements ParameterizedMiddlewareInterfa
 #[Filter('group', new Exact())]
 #[Filter('created', new DateTime())]
 #[Filter('free', new Text())]
-final class UnitFilterModel
-{
-}
+final class UnitFilterModel {}
 
 #[Route\Controller('/units')]
 final readonly class UnitApiController
@@ -63,19 +62,30 @@ final readonly class UnitApiController
         throw new \LogicException('Must not execute.');
     }
 
-    #[Route\Patch('/static')] #[API\Endpoint] public function patch(): HttpResponse
+    #[Route\Patch('/static')]
+    #[API\Endpoint]
+    public function patch(): HttpResponse
     {
         throw new \LogicException('Must not execute.');
     }
-    #[Route\Delete('/static')] #[API\Endpoint] public function delete(): HttpResponse
+
+    #[Route\Delete('/static')]
+    #[API\Endpoint]
+    public function delete(): HttpResponse
     {
         throw new \LogicException('Must not execute.');
     }
-    #[Route\Options('/static')] #[API\Endpoint] public function options(): HttpResponse
+
+    #[Route\Options('/static')]
+    #[API\Endpoint]
+    public function options(): HttpResponse
     {
         throw new \LogicException('Must not execute.');
     }
-    #[Route\Head('/static')] #[API\Endpoint] public function head(): HttpResponse
+
+    #[Route\Head('/static')]
+    #[API\Endpoint]
+    public function head(): HttpResponse
     {
         throw new \LogicException('Must not execute.');
     }
@@ -85,7 +95,9 @@ final readonly class UnitApiController
 #[Route\Controller('/secret')]
 final class UnitHiddenController
 {
-    #[Route\Get] #[API\Endpoint] public function get(): HttpResponse
+    #[Route\Get]
+    #[API\Endpoint]
+    public function get(): HttpResponse
     {
         throw new \LogicException('Must not execute.');
     }

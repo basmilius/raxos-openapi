@@ -32,9 +32,7 @@ final readonly class Example implements DefinitionInterface
         public mixed $value,
         public ?string $description = null,
         public ?string $externalValue = null
-    )
-    {
-    }
+    ) {}
 
     /**
      * {@inheritdoc}

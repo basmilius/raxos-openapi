@@ -30,9 +30,9 @@ it('maps scalar aliases, literal booleans, unions and special object types', fun
 
 it('removes incomplete schema reservations after errors and permits retries', function (): void {
     $builder = new SchemaBuilder();
-    expect(fn () => $builder->reference(F\UnitInvalidSchema::class))->toThrow(Error::class);
+    expect(fn() => $builder->reference(F\UnitInvalidSchema::class))->toThrow(Error::class);
     expect($builder->schemas->toArray())->toBe([]);
-    expect(fn () => $builder->reference('MissingOpenAPIClass'))->toThrow(Raxos\OpenAPI\Error\ReflectionErrorException::class);
+    expect(fn() => $builder->reference('MissingOpenAPIClass'))->toThrow(Raxos\OpenAPI\Error\ReflectionErrorException::class);
     expect($builder->schemas->toArray())->toBe([])->and($builder->reference(F\UnitDto::class))->not->toBeNull();
     expect($builder->reference(stdClass::class))->toBeNull();
 });
@@ -45,6 +45,7 @@ it('keeps distinct descriptions and content when a JSON response model is reused
         if ($value instanceof Raxos\OpenAPI\Definition\Reference) {
             $value = $builder->responses->get(substr($value->to, strlen('#/components/responses/')));
         }
+
         return documentData($value);
     };
     expect($resolve($first)['description'])->toBe('Found')->and($resolve($second)['description'])->toBe('Created')

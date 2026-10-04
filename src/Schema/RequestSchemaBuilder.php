@@ -53,6 +53,7 @@ final class RequestSchemaBuilder
      *
      * @param SchemaBuilder $builder
      * @param class-string $model
+     *
      * @return Schema
      * @throws ReflectionException
      * @author Bas Milius <bas@mili.us>
@@ -120,6 +121,7 @@ final class RequestSchemaBuilder
      * @param RequestPropertyMetadata $metadata
      * @param PropertyAttribute|null $attribute
      * @param class-string $model
+     *
      * @return Schema
      * @author Bas Milius <bas@mili.us>
      * @since 3.3.0
@@ -179,6 +181,7 @@ final class RequestSchemaBuilder
      * @param SchemaBuilder $builder
      * @param ConstraintAttributeInterface $constraint
      * @param bool $nullable
+     *
      * @return array<string, mixed>|null
      * @author Bas Milius <bas@mili.us>
      * @since 3.3.0
