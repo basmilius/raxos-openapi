@@ -3,15 +3,11 @@ declare(strict_types=1);
 
 namespace Raxos\OpenAPI\Schema;
 
-use Raxos\Collection\CursorPage;
-use Raxos\Collection\Paginated;
+use Raxos\Collection\{CursorPage, Paginated};
 use Raxos\Contract\Collection\ArrayListInterface;
 use Raxos\Contract\OpenAPI\OpenAPIExceptionInterface;
-use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\MediaType;
-use Raxos\OpenAPI\Definition\Reference;
-use Raxos\OpenAPI\Definition\Response;
-use Raxos\OpenAPI\Definition\Schema;
+use Raxos\OpenAPI\Attribute\Model;
+use Raxos\OpenAPI\Definition\{MediaType, Reference, Response, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\SchemaBuilder;
 
@@ -77,7 +73,7 @@ final class BuiltinSchemaBuilder
             new Schema(
                 type: SchemaType::ARRAY,
                 items: $genericClass !== null
-                    ? $builder->auto(new Attr\Model(), [$genericClass])
+                    ? $builder->auto(new Model(), [$genericClass])
                     : null
             )
         );
@@ -106,7 +102,7 @@ final class BuiltinSchemaBuilder
                     'items' => new Schema(
                         type: SchemaType::ARRAY,
                         items: $genericClass !== null
-                            ? $builder->auto(new Attr\Model(), [$genericClass])
+                            ? $builder->auto(new Model(), [$genericClass])
                             : null
                     ),
                     'page' => new Schema(
@@ -145,7 +141,7 @@ final class BuiltinSchemaBuilder
         return self::response(new Schema(
             type: SchemaType::OBJECT,
             properties: [
-                'items' => new Schema(type: SchemaType::ARRAY, items: $genericClass !== null ? $builder->auto(new Attr\Model(), [$genericClass]) : null),
+                'items' => new Schema(type: SchemaType::ARRAY, items: $genericClass !== null ? $builder->auto(new Model(), [$genericClass]) : null),
                 'next_cursor' => new Schema(type: SchemaType::STRING, nullable: true),
                 'has_more' => new Schema(type: SchemaType::BOOLEAN)
             ],
@@ -170,4 +166,5 @@ final class BuiltinSchemaBuilder
             ]
         );
     }
+
 }

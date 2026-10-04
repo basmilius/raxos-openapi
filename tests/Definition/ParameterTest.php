@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-use Raxos\OpenAPI\Definition as D;
-use Raxos\OpenAPI\Enum as E;
+use Raxos\OpenAPI\Definition\{Parameter, Schema};
+use Raxos\OpenAPI\Enum\{In, SchemaType};
 use function RaxosTests\OpenAPI\documentData;
 
-covers(D\Parameter::class);
+covers(Parameter::class);
 
 it('serializes nested definitions and preserves meaningful empty values', function (): void {
-    expect(documentData(new D\Parameter('page', E\In::QUERY, schema: new D\Schema(type: E\SchemaType::INTEGER, minimum: 0))))->toBe(['name' => 'page', 'in' => 'query', 'required' => false, 'deprecated' => false, 'allowEmptyValue' => false, 'schema' => ['type' => 'integer', 'minimum' => 0]]);
+    expect(documentData(new Parameter('page', In::QUERY, schema: new Schema(type: SchemaType::INTEGER, minimum: 0))))->toBe(['name' => 'page', 'in' => 'query', 'required' => false, 'deprecated' => false, 'allowEmptyValue' => false, 'schema' => ['type' => 'integer', 'minimum' => 0]]);
 });

@@ -2,18 +2,17 @@
 declare(strict_types=1);
 
 use Opis\JsonSchema\Validator;
-use Raxos\Collection\CursorPage;
-use Raxos\Collection\Paginated;
+use Raxos\Collection\{CursorPage, Paginated};
 use Raxos\Contract\Collection\ArrayListInterface;
-use Raxos\OpenAPI\Schema as B;
+use Raxos\OpenAPI\Schema\BuiltinSchemaBuilder;
 use Raxos\OpenAPI\SchemaBuilder;
-use RaxosTests\OpenAPI as F;
+use RaxosTests\OpenAPI\UnitDto;
 use function RaxosTests\OpenAPI\documentData;
 
-covers(B\BuiltinSchemaBuilder::class);
+covers(BuiltinSchemaBuilder::class);
 
 it('describes item types consistently for collection and pagination responses', function (string $class, ?string $generic, ?array $items): void {
-    $data = documentData(B\BuiltinSchemaBuilder::build(new SchemaBuilder(), $class, $generic));
+    $data = documentData(BuiltinSchemaBuilder::build(new SchemaBuilder(), $class, $generic));
     $schema = $data['content']['application/json']['schema'];
 
     if ($class === Paginated::class) {
@@ -32,16 +31,15 @@ it('describes item types consistently for collection and pagination responses', 
     [ArrayListInterface::class, 'int', ['type' => 'integer', 'format' => 'int32']],
     [Paginated::class, null, null],
     [Paginated::class, 'string', ['type' => 'string']],
-    [Paginated::class, F\UnitDto::class, ['$ref' => '#/components/schemas/' . str_replace('\\', '.', F\UnitDto::class)]]
+    [Paginated::class, UnitDto::class, ['$ref' => '#/components/schemas/' . str_replace('\\', '.', UnitDto::class)]]
 ]);
 
 it('does not interpret unknown response classes as built-in collections', function (): void {
-    expect(B\BuiltinSchemaBuilder::build(new SchemaBuilder(), stdClass::class, null))->toBeNull();
+    expect(BuiltinSchemaBuilder::build(new SchemaBuilder(), stdClass::class, null))->toBeNull();
 });
 
-
 it('describes cursor pages without a total and validates their nullable continuation', function (): void {
-    $data = documentData(B\BuiltinSchemaBuilder::build(new SchemaBuilder(), CursorPage::class, 'int'));
+    $data = documentData(BuiltinSchemaBuilder::build(new SchemaBuilder(), CursorPage::class, 'int'));
     $schema = $data['content']['application/json']['schema'];
     expect(array_keys($schema['properties']))->toBe(['items', 'next_cursor', 'has_more']);
     $compiled = json_decode(json_encode($schema));

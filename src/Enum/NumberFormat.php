@@ -12,8 +12,10 @@ namespace Raxos\OpenAPI\Enum;
  */
 enum NumberFormat: string
 {
+
     case DOUBLE = 'double';
     case FLOAT = 'float';
     case INT32 = 'int32';
     case INT64 = 'int64';
+
 }

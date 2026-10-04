@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use Raxos\OpenAPI\Definition\{Components, Info};
 use Raxos\OpenAPI\{OpenAPI, RouterBuilder};
+use Raxos\OpenAPI\Definition\{Components, Info};
 use Raxos\OpenAPI\Tests\Fixtures\{JsonTree, TreeController};
 use Raxos\Router\Router;
 

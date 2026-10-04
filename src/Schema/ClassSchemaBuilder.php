@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Raxos\OpenAPI\Schema;
 
 use Raxos\Contract\OpenAPI\SchemaBuilderInterface;
-use Raxos\OpenAPI\Attribute as Attr;
+use Raxos\OpenAPI\Attribute\Schema as SchemaAttribute;
 use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
@@ -25,10 +25,11 @@ final readonly class ClassSchemaBuilder implements SchemaBuilderInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    public function build(SchemaBuilder $builder, Attr\Schema $schemaAttr, array $types, bool $nullable): Reference|Schema|null
+    public function build(SchemaBuilder $builder, SchemaAttribute $schemaAttr, array $types, bool $nullable): Reference|Schema|null
     {
         try {
             $class = new ReflectionClass($types[0]);
@@ -51,6 +52,7 @@ final readonly class ClassSchemaBuilder implements SchemaBuilderInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */

@@ -48,6 +48,7 @@ use function max;
  */
 final class RequestSchemaBuilder
 {
+
     /**
      * Infers input properties without evaluating optional rules that depend on runtime context.
      *
@@ -219,4 +220,5 @@ final class RequestSchemaBuilder
             default => null
         };
     }
+
 }

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-use Raxos\OpenAPI\Definition as D;
+use Raxos\OpenAPI\Definition\License;
 use function RaxosTests\OpenAPI\documentData;
 
-covers(D\License::class);
+covers(License::class);
 
 it('serializes nested definitions and preserves meaningful empty values', function (): void {
-    expect(documentData(new D\License('MIT', 'https://example.test/license')))->toBe(['name' => 'MIT', 'url' => 'https://example.test/license']);
-    expect(documentData(new D\License('MIT')))->toBe(['name' => 'MIT']);
+    expect(documentData(new License('MIT', 'https://example.test/license')))->toBe(['name' => 'MIT', 'url' => 'https://example.test/license']);
+    expect(documentData(new License('MIT')))->toBe(['name' => 'MIT']);
 });

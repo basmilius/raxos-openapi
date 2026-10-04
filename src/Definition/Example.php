@@ -16,6 +16,7 @@ use function array_filter;
  */
 final readonly class Example implements DefinitionInterface
 {
+
     /**
      * Example constructor.
      *
@@ -36,6 +37,7 @@ final readonly class Example implements DefinitionInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -48,4 +50,5 @@ final readonly class Example implements DefinitionInterface
             'externalValue' => $this->externalValue,
         ], DefinitionHelper::isNotNull(...));
     }
+
 }

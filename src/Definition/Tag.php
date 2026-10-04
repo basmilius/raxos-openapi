@@ -33,6 +33,7 @@ final readonly class Tag implements DefinitionInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.7.0
      */

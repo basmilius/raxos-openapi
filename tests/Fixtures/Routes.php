@@ -6,18 +6,20 @@ namespace RaxosTests\OpenAPI;
 use Attribute;
 use Closure;
 use Generator;
+use LogicException;
 use Raxos\Contract\OpenAPI\ParameterizedMiddlewareInterface;
 use Raxos\Http\{HttpRequest, HttpResponse, HttpResponseCode};
-use Raxos\OpenAPI\Attribute as API;
+use Raxos\OpenAPI\Attribute\{Endpoint, FilterParams, Hidden, Parameter as ParameterAttribute, Response};
 use Raxos\OpenAPI\Definition\Parameter;
 use Raxos\OpenAPI\Enum\In;
-use Raxos\Router\Attribute as Route;
+use Raxos\Router\Attribute\{Controller, Delete, Get, Head, MapQuery, Options, Patch, Post, Put};
 use Raxos\Search\Attribute\Filter;
 use Raxos\Search\Filter\{DateTime, Exact, Text};
 
 #[Attribute(Attribute::TARGET_METHOD)]
 final readonly class UnitApiMiddleware implements ParameterizedMiddlewareInterface
 {
+
     public function handle(HttpRequest $request, Closure $next): HttpResponse
     {
         return $next($request);
@@ -28,6 +30,7 @@ final readonly class UnitApiMiddleware implements ParameterizedMiddlewareInterfa
         yield 'auth' => new Parameter('X-Unit', In::HEADER, required: true);
         yield 'session' => new Parameter('session', In::COOKIE);
     }
+
 }
 
 #[Filter('group', new Exact())]
@@ -35,70 +38,74 @@ final readonly class UnitApiMiddleware implements ParameterizedMiddlewareInterfa
 #[Filter('free', new Text())]
 final class UnitFilterModel {}
 
-#[Route\Controller('/units')]
+#[Controller('/units')]
 final readonly class UnitApiController
 {
-    #[Route\Get('/$id/$identifier')]
+
+    #[Get('/$id/$identifier')]
     #[UnitApiMiddleware]
-    #[API\FilterParams(UnitFilterModel::class)]
-    #[API\Endpoint(summary: 'List', parameters: [new API\Parameter('group', In::QUERY)], security: ['bearer', 'oauth' => ['read']])]
-    #[API\Response(HttpResponseCode::OK, 'Found', UnitShape::class)]
-    public function get(int $id, string $identifier, #[Route\MapQuery('search')] ?string $q = null): HttpResponse
+    #[FilterParams(UnitFilterModel::class)]
+    #[Endpoint(summary: 'List', parameters: [new ParameterAttribute('group', In::QUERY)], security: ['bearer', 'oauth' => ['read']])]
+    #[Response(HttpResponseCode::OK, 'Found', UnitShape::class)]
+    public function get(int $id, string $identifier, #[MapQuery('search')] ?string $q = null): HttpResponse
     {
-        throw new \LogicException('Must not execute.');
+        throw new LogicException('Must not execute.');
     }
 
-    #[Route\Post('/$id/$identifier')]
-    #[API\Endpoint(requestModel: UnitRequest::class, requestModelDescription: 'Input', requestModelRequired: true, responses: [new API\Response(HttpResponseCode::CREATED, 'Created')])]
+    #[Post('/$id/$identifier')]
+    #[Endpoint(requestModel: UnitRequest::class, requestModelDescription: 'Input', requestModelRequired: true, responses: [new Response(HttpResponseCode::CREATED, 'Created')])]
     public function post(int $id, string $identifier): HttpResponse
     {
-        throw new \LogicException('Must not execute.');
+        throw new LogicException('Must not execute.');
     }
 
-    #[Route\Put('/static')]
-    #[API\Endpoint(requestModelDescription: 'Optional', requestModelRequired: false)]
+    #[Put('/static')]
+    #[Endpoint(requestModelDescription: 'Optional', requestModelRequired: false)]
     public function put(): HttpResponse
     {
-        throw new \LogicException('Must not execute.');
+        throw new LogicException('Must not execute.');
     }
 
-    #[Route\Patch('/static')]
-    #[API\Endpoint]
+    #[Patch('/static')]
+    #[Endpoint]
     public function patch(): HttpResponse
     {
-        throw new \LogicException('Must not execute.');
+        throw new LogicException('Must not execute.');
     }
 
-    #[Route\Delete('/static')]
-    #[API\Endpoint]
+    #[Delete('/static')]
+    #[Endpoint]
     public function delete(): HttpResponse
     {
-        throw new \LogicException('Must not execute.');
+        throw new LogicException('Must not execute.');
     }
 
-    #[Route\Options('/static')]
-    #[API\Endpoint]
+    #[Options('/static')]
+    #[Endpoint]
     public function options(): HttpResponse
     {
-        throw new \LogicException('Must not execute.');
+        throw new LogicException('Must not execute.');
     }
 
-    #[Route\Head('/static')]
-    #[API\Endpoint]
+    #[Head('/static')]
+    #[Endpoint]
     public function head(): HttpResponse
     {
-        throw new \LogicException('Must not execute.');
+        throw new LogicException('Must not execute.');
     }
+
 }
 
-#[API\Hidden]
-#[Route\Controller('/secret')]
+#[Hidden]
+#[Controller('/secret')]
 final class UnitHiddenController
 {
-    #[Route\Get]
-    #[API\Endpoint]
+
+    #[Get]
+    #[Endpoint]
     public function get(): HttpResponse
     {
-        throw new \LogicException('Must not execute.');
+        throw new LogicException('Must not execute.');
     }
+
 }

@@ -5,11 +5,9 @@ namespace Raxos\OpenAPI\Schema;
 
 use DateTimeInterface;
 use Raxos\Contract\OpenAPI\SchemaBuilderInterface;
-use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\Reference;
-use Raxos\OpenAPI\Definition\Schema;
-use Raxos\OpenAPI\Enum\SchemaType;
-use Raxos\OpenAPI\Enum\StringFormat;
+use Raxos\OpenAPI\Attribute\Schema as SchemaAttribute;
+use Raxos\OpenAPI\Definition\{Reference, Schema};
+use Raxos\OpenAPI\Enum\{SchemaType, StringFormat};
 use Raxos\OpenAPI\SchemaBuilder;
 use function is_subclass_of;
 
@@ -22,14 +20,16 @@ use function is_subclass_of;
  */
 final readonly class DateTimeSchemaBuilder implements SchemaBuilderInterface
 {
+
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
     public function build(
         SchemaBuilder $builder,
-        Attr\Schema $schemaAttr,
+        SchemaAttribute $schemaAttr,
         array $types,
         bool $nullable
     ): Reference|Schema|null
@@ -43,6 +43,7 @@ final readonly class DateTimeSchemaBuilder implements SchemaBuilderInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -50,4 +51,5 @@ final readonly class DateTimeSchemaBuilder implements SchemaBuilderInterface
     {
         return $types[0] === DateTimeInterface::class || is_subclass_of($types[0], DateTimeInterface::class);
     }
+
 }

@@ -5,12 +5,13 @@ namespace Raxos\OpenAPI\Attribute;
 
 use Attribute;
 use Raxos\Database\Orm\Model;
+use Raxos\Search\Attribute\Filter;
 
 /**
  * Class FilterParams
  *
  * Documents the structured search/filter query parameters of an endpoint by
- * reflecting the `#[Raxos\Search\Attribute\Filter]` attributes declared on the
+ * reflecting the `#[Filter]` attributes declared on the
  * given model. Each filter that implements `StructuredFilterInterface` contributes
  * one or more query parameters via its `describe()` method.
  *

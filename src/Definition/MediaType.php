@@ -16,6 +16,7 @@ use function array_filter;
  */
 final readonly class MediaType implements DefinitionInterface
 {
+
     /**
      * MediaType constructor.
      *
@@ -36,6 +37,7 @@ final readonly class MediaType implements DefinitionInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -48,4 +50,5 @@ final readonly class MediaType implements DefinitionInterface
             'encoding' => $this->encoding
         ], DefinitionHelper::isNotNull(...));
     }
+
 }

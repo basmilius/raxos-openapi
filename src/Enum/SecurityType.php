@@ -12,8 +12,10 @@ namespace Raxos\OpenAPI\Enum;
  */
 enum SecurityType: string
 {
+
     case API_KEY = 'apiKey';
     case HTTP = 'http';
     case OAUTH2 = 'oauth2';
     case OPENID_CONNECT = 'openIdConnect';
+
 }

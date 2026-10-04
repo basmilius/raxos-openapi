@@ -17,6 +17,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_PROPERTY)]
 final readonly class Required
 {
+
     /**
      * Overrides inferred input requiredness, including rules that depend on runtime context.
      *
@@ -26,4 +27,5 @@ final readonly class Required
      * @since 3.3.0
      */
     public function __construct(public bool $required = true) {}
+
 }

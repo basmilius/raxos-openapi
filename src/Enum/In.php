@@ -12,8 +12,10 @@ namespace Raxos\OpenAPI\Enum;
  */
 enum In: string
 {
+
     case COOKIE = 'cookie';
     case HEADER = 'header';
     case PATH = 'path';
     case QUERY = 'query';
+
 }

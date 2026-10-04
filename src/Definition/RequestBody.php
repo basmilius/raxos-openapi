@@ -35,6 +35,7 @@ final readonly class RequestBody implements DefinitionInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */

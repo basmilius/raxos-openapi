@@ -16,6 +16,7 @@ use function array_filter;
  */
 final readonly class Encoding implements DefinitionInterface
 {
+
     /**
      * Encoding constructor.
      *
@@ -38,6 +39,7 @@ final readonly class Encoding implements DefinitionInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -51,4 +53,5 @@ final readonly class Encoding implements DefinitionInterface
             'allowReserved' => $this->allowReserved
         ], DefinitionHelper::isNotNull(...));
     }
+
 }

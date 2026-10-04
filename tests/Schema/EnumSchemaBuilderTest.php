@@ -1,20 +1,21 @@
 <?php
 declare(strict_types=1);
 
-use Raxos\OpenAPI\Attribute as A;
-use Raxos\OpenAPI\Schema as B;
+use Raxos\OpenAPI\Attribute\Property;
+use Raxos\OpenAPI\Schema\EnumSchemaBuilder;
 use Raxos\OpenAPI\SchemaBuilder;
-use RaxosTests\OpenAPI as F;
+use Raxos\OpenAPI\Tests\Fixtures\State;
+use RaxosTests\OpenAPI\{UnitEmptyInteger, UnitEmptyString, UnitInteger};
 use function RaxosTests\OpenAPI\documentData;
 
-covers(B\EnumSchemaBuilder::class);
+covers(EnumSchemaBuilder::class);
 
 it('retains numeric, string and empty backed enums with nullable values', function (string $class, string $type, array $values): void {
-    $builder = new B\EnumSchemaBuilder();
+    $builder = new EnumSchemaBuilder();
     expect($builder::can([$class]))->toBeTrue()->and($builder::can(['string']))->toBeFalse();
-    expect(documentData($builder->build(new SchemaBuilder(), new A\Property(), [$class], false)))->toBe(['type' => $type, 'enum' => $values]);
-    expect(documentData($builder->build(new SchemaBuilder(), new A\Property(), [$class], true)))->toBe(['type' => [$type, 'null'], 'enum' => [...$values, null]]);
+    expect(documentData($builder->build(new SchemaBuilder(), new Property(), [$class], false)))->toBe(['type' => $type, 'enum' => $values]);
+    expect(documentData($builder->build(new SchemaBuilder(), new Property(), [$class], true)))->toBe(['type' => [$type, 'null'], 'enum' => [...$values, null]]);
 })->with([
-    [F\UnitInteger::class, 'integer', [0, 1]], [F\UnitEmptyInteger::class, 'integer', []],
-    [F\UnitEmptyString::class, 'string', []], [Raxos\OpenAPI\Tests\Fixtures\State::class, 'string', ['ready']]
+    [UnitInteger::class, 'integer', [0, 1]], [UnitEmptyInteger::class, 'integer', []],
+    [UnitEmptyString::class, 'string', []], [State::class, 'string', ['ready']]
 ]);

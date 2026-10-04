@@ -12,6 +12,7 @@ namespace Raxos\OpenAPI\Enum;
  */
 enum SchemaType: string
 {
+
     case ARRAY = 'array';
     case BOOLEAN = 'boolean';
     case INTEGER = 'integer';
@@ -19,4 +20,5 @@ enum SchemaType: string
     case NUMBER = 'number';
     case OBJECT = 'object';
     case STRING = 'string';
+
 }

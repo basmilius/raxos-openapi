@@ -28,6 +28,7 @@ use function str_starts_with;
  */
 final readonly class Schema implements DefinitionInterface
 {
+
     /**
      * Schema constructor.
      *
@@ -107,6 +108,7 @@ final readonly class Schema implements DefinitionInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -162,4 +164,5 @@ final readonly class Schema implements DefinitionInterface
 
         return $schema === [] ? new stdClass() : $schema;
     }
+
 }

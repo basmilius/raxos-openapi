@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-use Raxos\OpenAPI\Definition as D;
+use Raxos\OpenAPI\Definition\Tag;
 use function RaxosTests\OpenAPI\documentData;
 
-covers(D\Tag::class);
+covers(Tag::class);
 
 it('serializes nested definitions and preserves meaningful empty values', function (): void {
-    expect(documentData(new D\Tag('products', '')))->toBe(['name' => 'products', 'description' => '']);
+    expect(documentData(new Tag('products', '')))->toBe(['name' => 'products', 'description' => '']);
 });

@@ -12,6 +12,7 @@ namespace Raxos\OpenAPI\Enum;
  */
 enum StringFormat: string
 {
+
     case BINARY = 'binary';
     case BYTE = 'byte';
     case DATE = 'date';
@@ -25,4 +26,5 @@ enum StringFormat: string
     case URI = 'uri';
     case URI_REFERENCE = 'uri-reference';
     case UUID = 'uuid';
+
 }

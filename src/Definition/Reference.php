@@ -28,7 +28,7 @@ final readonly class Reference implements DefinitionInterface
     ) {}
 
     /**
-     *
+     * Serializes the target as an unresolved $ref link.
      *
      * @return string[]
      * @author Bas Milius <bas@mili.us>

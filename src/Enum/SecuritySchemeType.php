@@ -12,6 +12,8 @@ namespace Raxos\OpenAPI\Enum;
  */
 enum SecuritySchemeType: string
 {
+
     case BASIC = 'basic';
     case BEARER = 'bearer';
+
 }

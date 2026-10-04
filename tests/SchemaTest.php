@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
+use Opis\JsonSchema\Validator;
 use Raxos\OpenAPI\Attribute\Property;
-use Raxos\OpenAPI\Definition\Schema;
+use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\SchemaBuilder;
 use Raxos\OpenAPI\Tests\Fixtures\{JsonTree, State, Tree};
@@ -60,12 +61,12 @@ it('validates recursive DTO payloads against their generated JSON Schema', funct
     $reference = $builder->reference(Tree::class);
     $schema = json_decode(json_encode(['$ref' => $reference->jsonSerialize()['$ref'], 'components' => ['schemas' => $builder->schemas]], JSON_THROW_ON_ERROR));
     $payload = (object)['active' => $active, 'children' => [], 'parent' => null, 'state' => 'ready', 'optionalState' => null, 'identifier' => 0];
-    expect(new Opis\JsonSchema\Validator()->validate($payload, $schema)->isValid())->toBe($valid);
+    expect(new Validator()->validate($payload, $schema)->isValid())->toBe($valid);
 })->with([[true, true], [false, true], ['true', false], [1, false], [null, false]]);
 
 it('validates nullable number constraints including exclusive bounds and multiples', function (int|float|null $value, bool $valid): void {
     $schema = json_decode(json_encode(new Schema(type: SchemaType::NUMBER, nullable: true, minimum: 0.5, exclusiveMinimum: true, maximum: 2.5, multipleOf: 0.25), JSON_THROW_ON_ERROR));
-    expect(new Opis\JsonSchema\Validator()->validate($value, $schema)->isValid())->toBe($valid);
+    expect(new Validator()->validate($value, $schema)->isValid())->toBe($valid);
 })->with([[null, true], [0.5, false], [0.75, true], [2.5, true], [2.75, false], [0.8, false]]);
 
 it('does not weaken canonical components when a nullable reference is requested first', function (): void {
@@ -74,6 +75,6 @@ it('does not weaken canonical components when a nullable reference is requested 
     $required = $builder->reference(Tree::class);
     $schemas = json_decode(json_encode($builder->schemas), true);
     expect($nullable)->toBeInstanceOf(Schema::class)
-        ->and($required)->toBeInstanceOf(Raxos\OpenAPI\Definition\Reference::class)
+        ->and($required)->toBeInstanceOf(Reference::class)
         ->and($schemas[str_replace('\\', '.', Tree::class)]['type'])->toBe('object');
 });

@@ -6,9 +6,8 @@ namespace Raxos\OpenAPI\Schema;
 use JetBrains\PhpStorm\ArrayShape;
 use JsonSerializable;
 use Raxos\Contract\OpenAPI\SchemaBuilderInterface;
-use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\Reference;
-use Raxos\OpenAPI\Definition\Schema;
+use Raxos\OpenAPI\Attribute\{Property, Schema as SchemaAttribute};
+use Raxos\OpenAPI\Definition\{Reference, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\OpenAPI\SchemaBuilder;
@@ -34,14 +33,16 @@ use function trim;
  */
 final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
 {
+
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
     public function build(
         SchemaBuilder $builder,
-        Attr\Schema $schemaAttr,
+        SchemaAttribute $schemaAttr,
         array $types,
         bool $nullable
     ): Reference|Schema|null
@@ -120,7 +121,7 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
                 : new Schema(type: SchemaType::ARRAY, items: $schema);
         }
 
-        return $builder->auto(new Attr\Property(), [$type]);
+        return $builder->auto(new Property(), [$type]);
     }
 
     /**
@@ -160,6 +161,7 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
 
     /**
      * {@inheritdoc}
+     *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
@@ -176,4 +178,5 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
 
         return $shapeAttr !== null;
     }
+
 }

@@ -8,24 +8,13 @@ use JsonSerializable;
 use Raxos\Collection\Map;
 use Raxos\Contract\Collection\MapInterface;
 use Raxos\Contract\OpenAPI\OpenAPIExceptionInterface;
-use Raxos\Database\Orm\Attribute as ORM;
+use Raxos\Database\Orm\Attribute\{Alias, Column, Hidden};
 use Raxos\Foundation\Util\ReflectionUtil;
-use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\MediaType;
-use Raxos\OpenAPI\Definition\Reference;
-use Raxos\OpenAPI\Definition\Response;
-use Raxos\OpenAPI\Definition\Schema;
+use Raxos\OpenAPI\Attribute\{Model, Response as ResponseAttribute, Schema as SchemaAttribute};
+use Raxos\OpenAPI\Definition\{MediaType, Reference, Response, Schema};
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
-use Raxos\OpenAPI\Schema\BuiltinSchemaBuilder;
-use Raxos\OpenAPI\Schema\ClassSchemaBuilder;
-use Raxos\OpenAPI\Schema\DateTimeSchemaBuilder;
-use Raxos\OpenAPI\Schema\EnumSchemaBuilder;
-use Raxos\OpenAPI\Schema\FloatSchemaBuilder;
-use Raxos\OpenAPI\Schema\IntegerSchemaBuilder;
-use Raxos\OpenAPI\Schema\JsonSchemaBuilder;
-use Raxos\OpenAPI\Schema\RequestSchemaBuilder;
-use Raxos\OpenAPI\Schema\StringSchemaBuilder;
+use Raxos\OpenAPI\Schema\{BuiltinSchemaBuilder, ClassSchemaBuilder, DateTimeSchemaBuilder, EnumSchemaBuilder, FloatSchemaBuilder, IntegerSchemaBuilder, JsonSchemaBuilder, RequestSchemaBuilder, StringSchemaBuilder};
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
@@ -51,6 +40,7 @@ use function str_replace;
  */
 final readonly class SchemaBuilder
 {
+
     /**
      * SchemaBuilder constructor.
      *
@@ -91,7 +81,7 @@ final readonly class SchemaBuilder
 
         try {
             $class = new ReflectionClass($class);
-            $schemaAttr = $class->getAttributes(Attr\Schema::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
+            $schemaAttr = $class->getAttributes(SchemaAttribute::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
             $schemaAttr = $schemaAttr?->newInstance();
             $isEnum = EnumSchemaBuilder::can([$class->name]);
             $isJson = JsonSchemaBuilder::can([$class->name]);
@@ -100,7 +90,7 @@ final readonly class SchemaBuilder
                 return;
             }
 
-            $schemaAttr ??= new Attr\Model();
+            $schemaAttr ??= new Model();
 
             // Reserve the component before traversing properties that may point back to it.
             $this->schemas->set($schemaId, new Schema(type: SchemaType::OBJECT));
@@ -124,14 +114,14 @@ final readonly class SchemaBuilder
     /**
      * Builds a schema for a builtin type.
      *
-     * @param Attr\Response $responseAttr
+     * @param ResponseAttribute $responseAttr
      *
      * @return Reference|Response|Schema|null
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 2.1.0
      */
-    public function buildBuiltIn(Attr\Response $responseAttr): Reference|Response|Schema|null
+    public function buildBuiltIn(ResponseAttribute $responseAttr): Reference|Response|Schema|null
     {
         return BuiltinSchemaBuilder::build($this, $responseAttr->model, $responseAttr->modelGeneric);
     }
@@ -149,23 +139,23 @@ final readonly class SchemaBuilder
     public function properties(ReflectionClass $class): Generator
     {
         foreach ($class->getProperties() as $property) {
-            /** @var ReflectionAttribute<ORM\Column> $hiddenAttr */
-            $hiddenAttr = $property->getAttributes(ORM\Hidden::class)[0] ?? null;
+            /** @var ReflectionAttribute<Column> $hiddenAttr */
+            $hiddenAttr = $property->getAttributes(Hidden::class)[0] ?? null;
 
             if ($hiddenAttr !== null) {
                 continue;
             }
 
-            /** @var ReflectionAttribute<ORM\Alias> $aliasAttr */
-            $aliasAttr = $property->getAttributes(ORM\Alias::class)[0] ?? null;
+            /** @var ReflectionAttribute<Alias> $aliasAttr */
+            $aliasAttr = $property->getAttributes(Alias::class)[0] ?? null;
             $aliasAttr = $aliasAttr?->newInstance();
 
-            /** @var ReflectionAttribute<ORM\Column> $columnAttr */
-            $columnAttr = $property->getAttributes(ORM\Column::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
+            /** @var ReflectionAttribute<Column> $columnAttr */
+            $columnAttr = $property->getAttributes(Column::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
             $columnAttr = $columnAttr?->newInstance();
 
-            /** @var ReflectionAttribute<Attr\Schema> $schemaAttr */
-            $schemaAttr = $property->getAttributes(Attr\Schema::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
+            /** @var ReflectionAttribute<SchemaAttribute> $schemaAttr */
+            $schemaAttr = $property->getAttributes(SchemaAttribute::class, ReflectionAttribute::IS_INSTANCEOF)[0] ?? null;
 
             if ($schemaAttr === null) {
                 continue;
@@ -197,7 +187,7 @@ final readonly class SchemaBuilder
      * Returns the schema for a property.
      *
      * @param ReflectionProperty $property
-     * @param Attr\Schema $schemaAttr
+     * @param SchemaAttribute $schemaAttr
      *
      * @return Reference|Schema|null
      * @throws OpenAPIExceptionInterface
@@ -206,7 +196,7 @@ final readonly class SchemaBuilder
      */
     public function property(
         ReflectionProperty $property,
-        Attr\Schema $schemaAttr
+        SchemaAttribute $schemaAttr
     ): Reference|Schema|null
     {
         $types = ReflectionUtil::getTypes($property->getType());
@@ -287,14 +277,14 @@ final readonly class SchemaBuilder
     /**
      * Returns a response or a reference to a response.
      *
-     * @param Attr\Response $responseAttr
+     * @param ResponseAttribute $responseAttr
      *
      * @return Reference|Response|Schema|null
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    public function response(Attr\Response $responseAttr): Reference|Response|Schema|null
+    public function response(ResponseAttribute $responseAttr): Reference|Response|Schema|null
     {
         $content = $responseAttr->content;
 
@@ -337,7 +327,7 @@ final readonly class SchemaBuilder
     /**
      * Builds a schema object based on the types.
      *
-     * @param Attr\Schema $schemaAttr
+     * @param SchemaAttribute $schemaAttr
      * @param array $types
      * @param bool $nullable
      *
@@ -348,7 +338,7 @@ final readonly class SchemaBuilder
      * @internal
      */
     public function auto(
-        Attr\Schema $schemaAttr,
+        SchemaAttribute $schemaAttr,
         array $types,
         bool $nullable = false
     ): Reference|Schema|null
@@ -414,4 +404,5 @@ final readonly class SchemaBuilder
     {
         return str_replace('\\', '.', $className);
     }
+
 }

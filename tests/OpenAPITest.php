@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 use Raxos\OpenAPI\Definition\{Info, Operation, Path, Response};
-use Raxos\OpenAPI\{OpenAPI};
+use Raxos\OpenAPI\OpenAPI;
 use Symfony\Component\Yaml\Yaml;
 
 covers(OpenAPI::class);

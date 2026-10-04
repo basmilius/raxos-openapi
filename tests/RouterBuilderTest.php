@@ -49,7 +49,6 @@ it('selects only the requested controllers and ignores closure routes', function
     expect($builder->paths->toArray())->toBe([]);
 });
 
-
 it('infers required numeric query fields, nullable values, enum arrays and defaults', function (): void {
     $builder = new RouterBuilder(Router::createFromControllers(null, [QueryContractsController::class]));
     $builder->build();

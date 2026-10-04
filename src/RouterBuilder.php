@@ -7,29 +7,17 @@ use Generator;
 use Raxos\Collection\Map;
 use Raxos\Contract\Collection\MapInterface;
 use Raxos\Contract\Http\HttpRequestModelInterface;
-use Raxos\Contract\OpenAPI\OpenAPIExceptionInterface;
-use Raxos\Contract\OpenAPI\ParameterizedMiddlewareInterface;
-use Raxos\Contract\Router\FrameInterface;
-use Raxos\Contract\Router\RouterInterface;
+use Raxos\Contract\OpenAPI\{OpenAPIExceptionInterface, ParameterizedMiddlewareInterface};
+use Raxos\Contract\Router\{FrameInterface, RouterInterface};
 use Raxos\Contract\Search\StructuredFilterInterface;
 use Raxos\Foundation\Util\ReflectionUtil;
-use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\MediaType;
-use Raxos\OpenAPI\Definition\Operation;
-use Raxos\OpenAPI\Definition\Parameter;
-use Raxos\OpenAPI\Definition\Path;
-use Raxos\OpenAPI\Definition\RequestBody;
-use Raxos\OpenAPI\Definition\Response;
-use Raxos\OpenAPI\Definition\Schema;
-use Raxos\OpenAPI\Enum\In;
-use Raxos\OpenAPI\Enum\SchemaType;
-use Raxos\OpenAPI\Enum\StringFormat;
+use Raxos\OpenAPI\Attribute\{Endpoint, FilterParams, Hidden, Parameter as ParameterAttribute, Property, Response as ResponseAttribute};
+use Raxos\OpenAPI\Definition\{MediaType, Operation, Parameter, Path, RequestBody, Response, Schema};
+use Raxos\OpenAPI\Enum\{In, SchemaType, StringFormat};
 use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\Router\Attribute\MapQuery;
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Frame\ControllerFrame;
-use Raxos\Router\Frame\FrameStack;
-use Raxos\Router\Frame\RouteFrame;
+use Raxos\Router\Frame\{ControllerFrame, FrameStack, RouteFrame};
 use Raxos\Search\Attribute\Filter as SearchFilter;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -60,6 +48,7 @@ use function usort;
  */
 final class RouterBuilder
 {
+
     /**
      * Reuses generated response components while building the route specification.
      *
@@ -152,9 +141,9 @@ final class RouterBuilder
             $controller = new ReflectionClass($frame->route->class);
             $handler = $controller->getMethod($frame->route->method);
 
-            $hidden = !empty($controller->getAttributes(Attr\Hidden::class)) || !empty($handler->getAttributes(Attr\Hidden::class));
-            /** @var ReflectionAttribute<Attr\Endpoint> $endpoint */
-            $endpoint = $handler->getAttributes(Attr\Endpoint::class)[0] ?? null;
+            $hidden = !empty($controller->getAttributes(Hidden::class)) || !empty($handler->getAttributes(Hidden::class));
+            /** @var ReflectionAttribute<Endpoint> $endpoint */
+            $endpoint = $handler->getAttributes(Endpoint::class)[0] ?? null;
 
             if ($hidden || $endpoint === null) {
                 return null;
@@ -164,7 +153,7 @@ final class RouterBuilder
 
             $parameters = [
                 ...array_filter($parameters, static fn(Parameter $parameter) => $parameter->in !== In::PATH),
-                ...array_map(static fn(Attr\Parameter $parameter) => new Parameter(
+                ...array_map(static fn(ParameterAttribute $parameter) => new Parameter(
                     name: $parameter->name,
                     in: $parameter->in,
                     description: $parameter->description,
@@ -190,10 +179,10 @@ final class RouterBuilder
                 }
 
                 $types = ReflectionUtil::getTypes($parameter->getType());
-                $schema = $this->builder->auto(new Attr\Property(), $types, $parameter->getType()?->allowsNull() ?? false);
+                $schema = $this->builder->auto(new Property(), $types, $parameter->getType()?->allowsNull() ?? false);
 
                 if ($queryAttribute->enum !== null && in_array('array', $types, true)) {
-                    $schema = new Schema(type: SchemaType::ARRAY, items: $this->builder->auto(new Attr\Property(), [$queryAttribute->enum]));
+                    $schema = new Schema(type: SchemaType::ARRAY, items: $this->builder->auto(new Property(), [$queryAttribute->enum]));
                 }
 
                 if ($parameter->isDefaultValueAvailable() && $schema instanceof Schema) {
@@ -210,7 +199,7 @@ final class RouterBuilder
                 );
             }
 
-            $filterParams = $handler->getAttributes(Attr\FilterParams::class)[0] ?? null;
+            $filterParams = $handler->getAttributes(FilterParams::class)[0] ?? null;
 
             if ($filterParams !== null) {
                 $model = $filterParams->newInstance()->model;
@@ -247,7 +236,7 @@ final class RouterBuilder
                 }
             }
 
-            $responses = array_map(static fn(ReflectionAttribute $attr) => $attr->newInstance(), $handler->getAttributes(Attr\Response::class));
+            $responses = array_map(static fn(ReflectionAttribute $attr) => $attr->newInstance(), $handler->getAttributes(ResponseAttribute::class));
 
             if ($endpoint->responses !== null) {
                 $responses = array_merge($responses, $endpoint->responses);
@@ -376,7 +365,7 @@ final class RouterBuilder
         $pathParameters = array_filter($parameters, static fn(Parameter $parameter) => $parameter->in === In::PATH);
 
         usort($parameters, fn(Parameter $a, Parameter $b) => ($this->sortByIn($a->in) <=> $this->sortByIn($b->in)) ?: strcmp($a->name, $b->name));
-        usort($pathParameters, fn(Parameter $a, Parameter $b) => strlen($b->name) <=> strlen($a->name));
+        usort($pathParameters, static fn(Parameter $a, Parameter $b) => strlen($b->name) <=> strlen($a->name));
 
         $path = $stack->pathPlain;
 
@@ -416,7 +405,7 @@ final class RouterBuilder
     /**
      * Generates the response definitions.
      *
-     * @param Attr\Response[] $responses
+     * @param ResponseAttribute[] $responses
      *
      * @return Generator<int, Response>
      * @throws OpenAPIExceptionInterface
@@ -448,4 +437,5 @@ final class RouterBuilder
             In::COOKIE => 3,
         };
     }
+
 }
