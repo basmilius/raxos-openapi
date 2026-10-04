@@ -16,7 +16,6 @@ use function array_filter;
  */
 final readonly class MediaType implements DefinitionInterface
 {
-
     /**
      * MediaType constructor.
      *
@@ -33,12 +32,14 @@ final readonly class MediaType implements DefinitionInterface
         public mixed $example = null,
         public ?array $examples = null,
         public ?array $encoding = null
-    ) {}
+    )
+    {
+    }
 
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.8.0
      */
     public function jsonSerialize(): array
     {
@@ -49,5 +50,4 @@ final readonly class MediaType implements DefinitionInterface
             'encoding' => $this->encoding
         ], DefinitionHelper::isNotNull(...));
     }
-
 }

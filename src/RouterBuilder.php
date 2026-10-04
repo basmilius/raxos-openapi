@@ -7,16 +7,29 @@ use Generator;
 use Raxos\Collection\Map;
 use Raxos\Contract\Collection\MapInterface;
 use Raxos\Contract\Http\HttpRequestModelInterface;
-use Raxos\Contract\OpenAPI\{OpenAPIExceptionInterface, ParameterizedMiddlewareInterface};
-use Raxos\Contract\Router\{FrameInterface, RouterInterface};
+use Raxos\Contract\OpenAPI\OpenAPIExceptionInterface;
+use Raxos\Contract\OpenAPI\ParameterizedMiddlewareInterface;
+use Raxos\Contract\Router\FrameInterface;
+use Raxos\Contract\Router\RouterInterface;
 use Raxos\Contract\Search\StructuredFilterInterface;
+use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\{MediaType, Operation, Parameter, Path, RequestBody, Response, Schema};
-use Raxos\OpenAPI\Enum\{In, SchemaType, StringFormat};
+use Raxos\OpenAPI\Definition\MediaType;
+use Raxos\OpenAPI\Definition\Operation;
+use Raxos\OpenAPI\Definition\Parameter;
+use Raxos\OpenAPI\Definition\Path;
+use Raxos\OpenAPI\Definition\RequestBody;
+use Raxos\OpenAPI\Definition\Response;
+use Raxos\OpenAPI\Definition\Schema;
+use Raxos\OpenAPI\Enum\In;
+use Raxos\OpenAPI\Enum\SchemaType;
+use Raxos\OpenAPI\Enum\StringFormat;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\Router\Attribute\MapQuery;
 use Raxos\Router\Definition\Injectable;
-use Raxos\Router\Frame\{ControllerFrame, FrameStack, RouteFrame};
+use Raxos\Router\Frame\ControllerFrame;
+use Raxos\Router\Frame\FrameStack;
+use Raxos\Router\Frame\RouteFrame;
 use Raxos\Search\Attribute\Filter as SearchFilter;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -47,11 +60,24 @@ use function usort;
  */
 final class RouterBuilder
 {
-
+    /**
+     * Reuses generated response components while building the route specification.
+     *
+     * @var MapInterface
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.8.0
+     */
     public MapInterface $responses {
         get => $this->builder->responses;
     }
 
+    /**
+     * Reuses the component registry while deriving route request and response schemas.
+     *
+     * @var MapInterface
+     * @author Bas Milius <bas@mili.us>
+     * @since 1.8.0
+     */
     public MapInterface $schemas {
         get => $this->builder->schemas;
     }
@@ -72,7 +98,9 @@ final class RouterBuilder
         public MapInterface $paths = new Map(),
         public SchemaBuilder $builder = new SchemaBuilder(),
         public ?array $controllers = null
-    ) {}
+    )
+    {
+    }
 
     /**
      * Builds paths from the router.
@@ -106,7 +134,10 @@ final class RouterBuilder
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    private function operation(FrameStack $stack, array $parameters): ?Operation
+    private function operation(
+        FrameStack $stack,
+        array $parameters
+    ): ?Operation
     {
         try {
             /** @var RouteFrame|null $frame */
@@ -152,10 +183,32 @@ final class RouterBuilder
                     continue;
                 }
 
+                $queryAttribute = $mapQuery->newInstance();
+                $name = $queryAttribute->key ?? $parameter->name;
+                $existing = array_filter($parameters, static fn(Parameter $item): bool => $item->in === In::QUERY && $item->name === $name);
+
+                if ($existing !== []) {
+                    continue;
+                }
+
+                $types = ReflectionUtil::getTypes($parameter->getType());
+                $schema = $this->builder->auto(new Attr\Property(), $types, $parameter->getType()?->allowsNull() ?? false);
+
+                if ($queryAttribute->enum !== null && in_array('array', $types, true)) {
+                    $schema = new Schema(type: SchemaType::ARRAY, items: $this->builder->auto(new Attr\Property(), [$queryAttribute->enum]));
+                }
+
+                if ($parameter->isDefaultValueAvailable() && $schema instanceof Schema) {
+                    $values = get_object_vars($schema);
+                    $values['default'] = $parameter->getDefaultValue();
+                    $schema = new Schema(...$values);
+                }
+
                 $parameters[] = new Parameter(
-                    name: $mapQuery->newInstance()->key ?? $parameter->name,
+                    name: $name,
                     in: In::QUERY,
-                    required: false
+                    required: !$parameter->isDefaultValueAvailable() && !($parameter->getType()?->allowsNull() ?? false) && !in_array('array', $types, true),
+                    schema: $schema
                 );
             }
 
@@ -210,7 +263,7 @@ final class RouterBuilder
                 $content = null;
 
                 if ($endpoint->requestModel !== null && is_subclass_of($endpoint->requestModel, HttpRequestModelInterface::class)) {
-                    $schema = $this->builder->reference($endpoint->requestModel);
+                    $schema = $this->builder->requestReference($endpoint->requestModel);
 
                     if ($schema !== null) {
                         $content = [];
@@ -397,5 +450,4 @@ final class RouterBuilder
             In::COOKIE => 3,
         };
     }
-
 }

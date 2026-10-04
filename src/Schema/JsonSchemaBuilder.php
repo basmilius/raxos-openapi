@@ -5,9 +5,10 @@ namespace Raxos\OpenAPI\Schema;
 
 use JetBrains\PhpStorm\ArrayShape;
 use JsonSerializable;
-use Raxos\Contract\OpenAPI\{OpenAPIExceptionInterface, SchemaBuilderInterface};
+use Raxos\Contract\OpenAPI\SchemaBuilderInterface;
 use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\{Reference, Schema};
+use Raxos\OpenAPI\Definition\Reference;
+use Raxos\OpenAPI\Definition\Schema;
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
 use Raxos\OpenAPI\SchemaBuilder;
@@ -33,13 +34,17 @@ use function trim;
  */
 final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
 {
-
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    public function build(SchemaBuilder $builder, Attr\Schema $schemaAttr, array $types, bool $nullable): Reference|Schema|null
+    public function build(
+        SchemaBuilder $builder,
+        Attr\Schema $schemaAttr,
+        array $types,
+        bool $nullable
+    ): Reference|Schema|null
     {
         try {
             $class = new ReflectionClass($types[0]);
@@ -78,9 +83,12 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
      * Resolves ArrayShape types, preserving nested lists, dictionaries and unions.
      *
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.8.0
      */
-    private function ofType(SchemaBuilder $builder, string $type): Reference|Schema|null
+    private function ofType(
+        SchemaBuilder $builder,
+        string $type
+    ): Reference|Schema|null
     {
         $type = trim($type);
 
@@ -122,7 +130,10 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
      * @author Bas Milius <bas@mili.us>
      * @since 3.2.0
      */
-    private function split(string $type, string $separator): array
+    private function split(
+        string $type,
+        string $separator
+    ): array
     {
         $parts = [];
         $depth = 0;
@@ -165,5 +176,4 @@ final readonly class JsonSchemaBuilder implements SchemaBuilderInterface
 
         return $shapeAttr !== null;
     }
-
 }

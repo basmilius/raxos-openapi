@@ -4,8 +4,11 @@ declare(strict_types=1);
 namespace Raxos\OpenAPI\Definition;
 
 use Raxos\Contract\OpenAPI\DefinitionInterface;
+use Raxos\Error\InvalidArgumentException;
 use Raxos\OpenAPI\DefinitionHelper;
-use Raxos\OpenAPI\Enum\{NumberFormat, SchemaType, StringFormat};
+use Raxos\OpenAPI\Enum\NumberFormat;
+use Raxos\OpenAPI\Enum\SchemaType;
+use Raxos\OpenAPI\Enum\StringFormat;
 use stdClass;
 use function array_filter;
 use function array_map;
@@ -13,6 +16,8 @@ use function array_unique;
 use function array_values;
 use function is_array;
 use function is_bool;
+use function is_string;
+use function str_starts_with;
 
 /**
  * Class Schema
@@ -23,7 +28,6 @@ use function is_bool;
  */
 final readonly class Schema implements DefinitionInterface
 {
-
     /**
      * Schema constructor.
      *
@@ -55,9 +59,11 @@ final readonly class Schema implements DefinitionInterface
      * @param string[]|null $required
      * @param int|null $maxProperties
      * @param int|null $minProperties
+     * @param mixed $default
+     * @param array<string, mixed> $extensions
      *
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.8.0
      */
     public function __construct(
         public SchemaType|array|null $type = null,
@@ -88,7 +94,16 @@ final readonly class Schema implements DefinitionInterface
         public ?array $required = null,
         public ?int $maxProperties = null,
         public ?int $minProperties = null,
-    ) {}
+        public mixed $default = null,
+        public array $extensions = [],
+    )
+    {
+        foreach ($extensions as $name => $value) {
+            if (!is_string($name) || !str_starts_with($name, 'x-')) {
+                throw new InvalidArgumentException('Schema extension names must start with x-.');
+            }
+        }
+    }
 
     /**
      * {@inheritdoc}
@@ -124,7 +139,9 @@ final readonly class Schema implements DefinitionInterface
             'additionalProperties' => $this->additionalProperties,
             'required' => $this->required,
             'maxProperties' => $this->maxProperties,
-            'minProperties' => $this->minProperties
+            'minProperties' => $this->minProperties,
+            'default' => $this->default,
+            ...$this->extensions
         ], DefinitionHelper::isNotNull(...));
 
         if ($this->nullable === true) {
@@ -145,5 +162,4 @@ final readonly class Schema implements DefinitionInterface
 
         return $schema === [] ? new stdClass() : $schema;
     }
-
 }

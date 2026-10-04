@@ -1,9 +1,13 @@
 <?php
 declare(strict_types=1);
 
+use Raxos\Http\HttpResponse;
 use Raxos\OpenAPI\RouterBuilder;
+use Raxos\Router\DynamicRouter;
 use Raxos\Router\Router;
-use RaxosTests\OpenAPI\{UnitApiController, UnitHiddenController};
+use RaxosTests\OpenAPI\QueryContractsController;
+use RaxosTests\OpenAPI\UnitApiController;
+use RaxosTests\OpenAPI\UnitHiddenController;
 use function RaxosTests\OpenAPI\documentData;
 
 covers(RouterBuilder::class);
@@ -38,9 +42,21 @@ it('selects only the requested controllers and ignores closure routes', function
     $builder = new RouterBuilder($router, controllers: [UnitHiddenController::class]);
     $builder->build();
     expect($builder->paths->toArray())->toBe([]);
-    $dynamic = new Raxos\Router\DynamicRouter();
-    $dynamic->get('/closure', static fn (): Raxos\Http\HttpResponse => throw new LogicException('Must not execute.'));
+    $dynamic = new DynamicRouter();
+    $dynamic->get('/closure', static fn(): HttpResponse => throw new LogicException('Must not execute.'));
     $builder = new RouterBuilder($dynamic);
     $builder->build();
     expect($builder->paths->toArray())->toBe([]);
+});
+
+
+it('infers required numeric query fields, nullable values, enum arrays and defaults', function (): void {
+    $builder = new RouterBuilder(Router::createFromControllers(null, [QueryContractsController::class]));
+    $builder->build();
+    $paths = documentData($builder->paths);
+    $fields = array_column($paths['/query-contracts']['get']['parameters'], null, 'name');
+    expect($fields['page_size']['required'])->toBeTrue()->and($fields['page_size']['schema']['type'])->toBe('integer')
+        ->and($fields['term']['required'])->toBeFalse()->and($fields['term']['schema']['type'])->toContain('null', 'string')
+        ->and($fields['states']['required'])->toBeFalse()->and($fields['states']['schema']['items'])->toHaveKey('$ref')
+        ->and($fields['offset']['required'])->toBeFalse()->and($fields['offset']['schema']['default'])->toBe(0);
 });

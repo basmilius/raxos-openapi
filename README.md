@@ -19,7 +19,7 @@ Generate OpenAPI 3.1.1 JSON or YAML from Raxos controllers, PHP types and docume
 Requires PHP 8.5 or later. Enable the `fileinfo`, `json`, `simplexml` PHP extensions. Composer checks the remaining package and extension dependencies declared in [composer.json](composer.json).
 
 ```sh
-composer require "raxos/openapi:^3.2"
+composer require "raxos/openapi:^3.3"
 ```
 
 ## Usage
@@ -96,3 +96,5 @@ See [Testing Raxos](https://github.com/basmilius/raxos/blob/main/TESTING.md) for
 ## License
 
 [MIT](LICENSE). Copyright (c) 2017 - present Bas Milius.
+
+See [input schemas and validation](https://raxos.dev/openapi/input-schemas) for the optional APIs and their lifetime or transport guarantees.

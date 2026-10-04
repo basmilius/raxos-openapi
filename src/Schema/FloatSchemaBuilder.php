@@ -10,7 +10,7 @@ use Raxos\OpenAPI\Enum\{NumberFormat, SchemaType};
 use Raxos\OpenAPI\SchemaBuilder;
 
 /**
- * Class IntegerSchemaBuilder
+ * Class FloatSchemaBuilder
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\OpenAPI\Schema

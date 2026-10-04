@@ -11,14 +11,26 @@ use Raxos\Contract\OpenAPI\OpenAPIExceptionInterface;
 use Raxos\Database\Orm\Attribute as ORM;
 use Raxos\Foundation\Util\ReflectionUtil;
 use Raxos\OpenAPI\Attribute as Attr;
-use Raxos\OpenAPI\Definition\{MediaType, Reference, Response, Schema};
+use Raxos\OpenAPI\Definition\MediaType;
+use Raxos\OpenAPI\Definition\Reference;
+use Raxos\OpenAPI\Definition\Response;
+use Raxos\OpenAPI\Definition\Schema;
 use Raxos\OpenAPI\Enum\SchemaType;
 use Raxos\OpenAPI\Error\ReflectionErrorException;
-use Raxos\OpenAPI\Schema\{BuiltinSchemaBuilder, ClassSchemaBuilder, DateTimeSchemaBuilder, EnumSchemaBuilder, FloatSchemaBuilder, IntegerSchemaBuilder, JsonSchemaBuilder, StringSchemaBuilder};
+use Raxos\OpenAPI\Schema\BuiltinSchemaBuilder;
+use Raxos\OpenAPI\Schema\ClassSchemaBuilder;
+use Raxos\OpenAPI\Schema\DateTimeSchemaBuilder;
+use Raxos\OpenAPI\Schema\EnumSchemaBuilder;
+use Raxos\OpenAPI\Schema\FloatSchemaBuilder;
+use Raxos\OpenAPI\Schema\IntegerSchemaBuilder;
+use Raxos\OpenAPI\Schema\JsonSchemaBuilder;
+use Raxos\OpenAPI\Schema\RequestSchemaBuilder;
+use Raxos\OpenAPI\Schema\StringSchemaBuilder;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
+use Throwable;
 use function array_filter;
 use function array_map;
 use function array_values;
@@ -39,20 +51,23 @@ use function str_replace;
  */
 final readonly class SchemaBuilder
 {
-
     /**
      * SchemaBuilder constructor.
      *
      * @param MapInterface<string, Response> $responses
      * @param MapInterface<string, Schema> $schemas
+     * @param MapInterface<string> $diagnostics
      *
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
     public function __construct(
         public private(set) MapInterface $responses = new Map(),
-        public private(set) MapInterface $schemas = new Map()
-    ) {}
+        public private(set) MapInterface $schemas = new Map(),
+        public private(set) MapInterface $diagnostics = new Map()
+    )
+    {
+    }
 
     /**
      * Builds a schema for the class.
@@ -65,7 +80,10 @@ final readonly class SchemaBuilder
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    public function build(string $class, bool $nullable = false): void
+    public function build(
+        string $class,
+        bool $nullable = false
+    ): void
     {
         $schemaId = $this->schemaId($class);
 
@@ -96,9 +114,11 @@ final readonly class SchemaBuilder
             $this->schemas->set($schemaId, $schema);
         } catch (ReflectionException $err) {
             $this->schemas->unset($schemaId);
+
             throw new ReflectionErrorException($err);
-        } catch (\Throwable $err) {
+        } catch (Throwable $err) {
             $this->schemas->unset($schemaId);
+
             throw $err;
         }
     }
@@ -161,6 +181,7 @@ final readonly class SchemaBuilder
 
             if ($schemaAttr->schema !== null) {
                 yield $name => $schemaAttr->schema;
+
                 continue;
             }
 
@@ -185,7 +206,10 @@ final readonly class SchemaBuilder
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    public function property(ReflectionProperty $property, Attr\Schema $schemaAttr): Reference|Schema|null
+    public function property(
+        ReflectionProperty $property,
+        Attr\Schema $schemaAttr
+    ): Reference|Schema|null
     {
         $types = ReflectionUtil::getTypes($property->getType());
         $nullable = in_array('null', $types, true);
@@ -204,7 +228,10 @@ final readonly class SchemaBuilder
      * @author Bas Milius <bas@mili.us>
      * @since 1.8.0
      */
-    public function reference(string $class, bool $nullable = false): Reference|Schema|null
+    public function reference(
+        string $class,
+        bool $nullable = false
+    ): Reference|Schema|null
     {
         $schemaId = $this->schemaId($class);
         $this->build($class);
@@ -221,6 +248,44 @@ final readonly class SchemaBuilder
     }
 
     /**
+     * Builds a separate component using runtime input metadata.
+     *
+     * @param class-string $class
+     * @param bool $nullable
+     * @return Reference|Schema
+     * @throws OpenAPIExceptionInterface
+     * @author Bas Milius <bas@mili.us>
+     * @since 3.3.0
+     */
+    public function requestReference(
+        string $class,
+        bool $nullable = false
+    ): Reference|Schema
+    {
+        $id = 'Request.' . $this->schemaId($class);
+
+        if (!$this->schemas->has($id)) {
+            $this->schemas->set($id, new Schema(type: SchemaType::OBJECT));
+
+            try {
+                $this->schemas->set($id, RequestSchemaBuilder::build($this, $class));
+            } catch (ReflectionException $error) {
+                $this->schemas->unset($id);
+
+                throw new ReflectionErrorException($error);
+            } catch (Throwable $error) {
+                $this->schemas->unset($id);
+
+                throw $error;
+            }
+        }
+
+        $reference = new Reference('#/components/schemas/' . $id);
+
+        return $nullable ? new Schema(anyOf: [$reference, new Schema(type: SchemaType::NULL)]) : $reference;
+    }
+
+    /**
      * Returns a response or a reference to a response.
      *
      * @param Attr\Response $responseAttr
@@ -228,7 +293,7 @@ final readonly class SchemaBuilder
      * @return Reference|Response|Schema|null
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.8.0
      */
     public function response(Attr\Response $responseAttr): Reference|Response|Schema|null
     {
@@ -280,10 +345,14 @@ final readonly class SchemaBuilder
      * @return Reference|Schema|null
      * @throws OpenAPIExceptionInterface
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.8.0
      * @internal
      */
-    public function auto(Attr\Schema $schemaAttr, array $types, bool $nullable = false): Reference|Schema|null
+    public function auto(
+        Attr\Schema $schemaAttr,
+        array $types,
+        bool $nullable = false
+    ): Reference|Schema|null
     {
         $nullable = $nullable || in_array('null', $types, true);
         $types = array_values(array_filter($types, static fn(string $type): bool => $type !== 'null'));
@@ -346,5 +415,4 @@ final readonly class SchemaBuilder
     {
         return str_replace('\\', '.', $className);
     }
-
 }

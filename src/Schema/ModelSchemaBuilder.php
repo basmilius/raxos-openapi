@@ -11,7 +11,7 @@ use Raxos\OpenAPI\SchemaBuilder;
 use function is_subclass_of;
 
 /**
- * Class StringSchemaBuilder
+ * Class ModelSchemaBuilder
  *
  * @author Bas Milius <bas@mili.us>
  * @package Raxos\OpenAPI\Schema

@@ -16,7 +16,6 @@ use function array_filter;
  */
 final readonly class Encoding implements DefinitionInterface
 {
-
     /**
      * Encoding constructor.
      *
@@ -35,12 +34,14 @@ final readonly class Encoding implements DefinitionInterface
         public ?string $style = null,
         public ?bool $explode = null,
         public ?bool $allowReserved = null
-    ) {}
+    )
+    {
+    }
 
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.8.0
      */
     public function jsonSerialize(): array
     {
@@ -52,5 +53,4 @@ final readonly class Encoding implements DefinitionInterface
             'allowReserved' => $this->allowReserved
         ], DefinitionHelper::isNotNull(...));
     }
-
 }

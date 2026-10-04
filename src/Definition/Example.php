@@ -16,7 +16,6 @@ use function array_filter;
  */
 final readonly class Example implements DefinitionInterface
 {
-
     /**
      * Example constructor.
      *
@@ -33,12 +32,14 @@ final readonly class Example implements DefinitionInterface
         public mixed $value,
         public ?string $description = null,
         public ?string $externalValue = null
-    ) {}
+    )
+    {
+    }
 
     /**
      * {@inheritdoc}
      * @author Bas Milius <bas@mili.us>
-     * @since 3.2.0
+     * @since 1.8.0
      */
     public function jsonSerialize(): array
     {
@@ -49,5 +50,4 @@ final readonly class Example implements DefinitionInterface
             'externalValue' => $this->externalValue,
         ], DefinitionHelper::isNotNull(...));
     }
-
 }
